@@ -1,7 +1,7 @@
 {
   "name": "nodelicious",
-  "version": "1.0.0",
-  "description": "A simple HTTP server written in ECMAScript 6",
+  "version": "1.1.0",
+  "description": "A simple HTTP server written with ECMAScript 6",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/",
