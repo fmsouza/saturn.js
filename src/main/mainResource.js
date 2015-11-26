@@ -7,7 +7,7 @@ class MainResource {
 
 	constructor(router) {
 		router.get('/', this.getMainRoute);
-		router.get('/generator', this.getAlternativeRoute);
+		router.get('/generator', wrap(this.getAlternativeRoute));
 	}
 
 	getMainRoute(request, response) {
