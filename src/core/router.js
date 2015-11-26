@@ -4,6 +4,7 @@ const Config  = require('../config');
 const ServerDriver = require('express');
 const BodyParser = require("body-parser");
 const compression = require('compression');
+const helmet = require('helmet');
 let logger = LoggerFactory.getServerLogger();
 
 /**
@@ -16,12 +17,13 @@ class Router {
     constructor(){
         this.driver = new ServerDriver();
         this.driver.use(compression());
+        this.driver.use(helmet());
         this.driver.use(BodyParser.urlencoded({extended: true}));
         this.driver.use(BodyParser.json());
         this.driver.use(function(req, res, next) {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-            logger.info('Serving route '+req.url+' (GET)');
+            logger.info(`Serving route ${req.url} (${req.method})`);
             next();
         });
     }
