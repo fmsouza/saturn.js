@@ -11,7 +11,7 @@ module.exports = {
     },
     server: {
         ip: '0.0.0.0',
-        port: 8081
+        port: 8080
     },
     database: {
         dbName: process.env.NoDEJS_DB_NAME  || 'nodejs',
@@ -20,7 +20,5 @@ module.exports = {
         user: process.env.NODEJS_DB_USER    || '',
         pass: process.env.NODEJS_DB_PASS    || ''
     },
-    resources: [
-        'main/mainResource'
-    ]
+    resources: [ 'api/mainResource' ]
 };
