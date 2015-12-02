@@ -82,6 +82,21 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
+	it('should get a list with all documents on the collection \'test\', ordered by the field \'foo\', by doing a GET request to \'/test\'', function*() {
+		let data;
+		const body = { sort: { foo: 1 } }
+		try {
+			var output = yield Http.get(`${host}/test`, body);
+			data = output.body;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data instanceof Array, true);
+			Assert.equal(data.length, 1);
+			Assert.equal(data[0].foo, 'bar');
+		}
+	});
+	
 	it('should delete a document in the collection \'test\' by doing a DELETE request to \'/test\' with the data to query for the document in the body', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		let data;

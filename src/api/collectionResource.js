@@ -1,7 +1,7 @@
 'use strict';
 const wrap = require('co-express');
 const ServerDriver = require('express');
-const SortResource = require('./sortResource');
+const PagingResource = require('./pagingResource');
 const GenericDAO   = require('../dao/genericDAO');
 
 class CollectionResource {
@@ -14,16 +14,19 @@ class CollectionResource {
 		router.put(this.base, wrap(this.putToCollection));
 		router.delete(this.base, wrap(this.deleteFromCollection));
 		// let driver = new ServerDriver();
-		// let resource = new SortResource(driver);
-		// router.use(resource.base, driver);
+		// new PagingResource(driver);
+		// router.use(this.base, driver);
 	}
 
 	*getFromCollection(request, response) {
 		const dao = new GenericDAO(request.params.collection);
 		const body = request.body || {};
+		const options = { sort: { _id: 1 } };
+		if(body.sort) options.sort = body.sort;
 		let data = [];
+		
 		try {
-			data = yield dao.find(body);
+			data = yield dao.find(body.data, options);
 			response.status(200).jsonp(data);
 		} catch (e) {
 			console.log(e);
