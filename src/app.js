@@ -1,15 +1,19 @@
 'use strict';
-/* global process; */
+/* global process, global; */
 const Config        = require('./config');
 const Core          = require('./core');
 const LoggerFactory = Core.LoggerFactory;
 const Router        = Core.Router;
+const Database      = Core.Database;
 const spawn         = require('co');
 
 const logger = LoggerFactory.getRuntimeLogger();
+const Process = process;
 
 spawn(function* main(){
     logger.info('Starting the server...');
+    
+    global.database = yield Database.connect(); // Creating connection to database
 
     // Configuring the RESTful router to handle HTTP requests
     let router = new Router();
@@ -20,5 +24,5 @@ spawn(function* main(){
 })
 .catch(function(error) {
     logger.error(error);
-    process.exit(1);
+    Process.exit(1);
 });
