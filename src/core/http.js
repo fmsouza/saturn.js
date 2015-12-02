@@ -29,10 +29,11 @@ class Http {
     /**
      * Makes GET request
      * @param {string} host - Host URL
+     * @param {Object} data - Data to be sent (Optional)
      * @returns {Promise}
      */
-    static get(host){
-        return Http.request({ uri: host });
+    static get(host, data){
+        return Http.request({ uri: host, body: data || {} });
     }
 
     /**
@@ -48,7 +49,7 @@ class Http {
     /**
      * Makes PUT request
      * @param {string} host - Host URL
-     * @param {Object} options
+     * @param {Object} data - Data to be sent
      * @returns {Promise}
      */
     static put(host, data){
@@ -58,10 +59,11 @@ class Http {
     /**
      * Makes DELETE request
      * @param {String} host - Host URL
+     * @param {Object} data - Data to be sent (Optional)
      * @returns {Promise}
      */
-    static delete(host){
-        return Http.request({ method: 'DELETE', uri: host });
+    static delete(host, data){
+        return Http.request({ method: 'DELETE', uri: host, body: data || {} });
     }
 }
 module.exports = Http;
