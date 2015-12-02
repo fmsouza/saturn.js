@@ -20,7 +20,7 @@ class Router {
         this.driver.use(helmet());
         this.driver.use(BodyParser.urlencoded({extended: true}));
         this.driver.use(BodyParser.json());
-        this.driver.use(function(req, res, next) {
+        this.driver.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
             logger.info(`Serving route ${req.url} (${req.method})`);
@@ -39,7 +39,7 @@ class Router {
             var session = new ServerDriver();
             let resource = new Resource(session);
             this.driver.use(resource.base, session);
-            logger.info('Resource registered: '+res);
+            logger.info(`Resource registered: ${res}`);
         }
     }
 
@@ -51,7 +51,7 @@ class Router {
      * @returns {void}
      */
     start(ip, port, callback) {
-        this.driver.listen(port, ip, function(){
+        return this.driver.listen(port, ip, () => {
             if(callback) callback();
             logger.info(`Server started in http://${ip}:${port}`);
         });
