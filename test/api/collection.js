@@ -55,6 +55,19 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
+	it('should get the documents which match to the given query on the collection \'test\' by doing a GET request to \'/test\' with the data to query in the body', function*() {
+		let data;
+		try {
+			var output = yield Http.get(`${host}/test`, savedObj);
+			data = output.body;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data instanceof Object, true);
+			Assert.equal(data[0].foo, 'bar');
+		}
+	});
+	
 	it('should get a list with all documents on the collection \'test\' by doing a GET request to \'/test\'', function*() {
 		let data;
 		try {

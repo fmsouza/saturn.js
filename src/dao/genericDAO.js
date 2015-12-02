@@ -8,8 +8,8 @@ class GenericDAO {
 		this.collection = connection.collection(collectionName);
 	}
 	
-	getAll() {
-		return this.collection.find({});
+	find(query) {
+		return this.collection.find(query);
 	}
 	
 	save(data) {

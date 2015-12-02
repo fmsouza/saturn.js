@@ -20,9 +20,10 @@ class CollectionResource {
 
 	*getFromCollection(request, response) {
 		const dao = new GenericDAO(request.params.collection);
+		const body = request.body || {};
 		let data = [];
 		try {
-			data = yield dao.getAll();
+			data = yield dao.find(body);
 			response.status(200).jsonp(data);
 		} catch (e) {
 			console.log(e);
