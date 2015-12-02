@@ -1,5 +1,5 @@
 'use strict';
-/* global describe, it, before, __dirname; */
+/* global describe, it, before, after, global, __dirname; */
 
 const base = `${__dirname}/../../src`;
 const Assert    = require('assert');
@@ -13,7 +13,7 @@ var router;
 
 describe('API HTTP Collection', () => {
 	
-	let server, host;
+	let server, host, savedObj;
 	
 	before(function*() {
 		const serverConfig = Config.server;
@@ -37,6 +37,21 @@ describe('API HTTP Collection', () => {
 		} finally {
 			Assert.equal(data instanceof Object, true);
 			Assert.equal(data.foo, obj.foo);
+			savedObj = data;
+		}
+	});
+	
+	it('should update a document in the collection \'test\' by doing a PUT request to \'/test\' with the data including the \'_id\' in the body', function*() {
+		let obj = JSON.parse(JSON.stringify(savedObj));
+		obj.bar = 'foo';
+		let data;
+		try {
+			var output = yield Http.put(`${host}/test`, obj);
+			data = output.body;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data, 'success');
 		}
 	});
 	
@@ -54,8 +69,20 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	after(function*() {
+	it('should delete a document in the collection \'test\' by doing a DELETE request to \'/test\' with the data to query for the document in the body', function*() {
+		let obj = JSON.parse(JSON.stringify(savedObj));
+		let data;
+		try {
+			var output = yield Http.delete(`${host}/test`, obj);
+			data = output.body;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data, 'success');
+		}
+	});
+	
+	after(() => {
 		server.close();
-		yield global.database.collection('test').remove({});
 	});
 });

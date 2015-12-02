@@ -41,11 +41,27 @@ class CollectionResource {
 	}
 
 	*putToCollection(request, response) {
-		response.jsonp({ type: 'success', message: 'hello generators!' });
+		const params = request.params;
+		const dao = new GenericDAO(params.collection);
+		const body = request.body;
+		try {
+			yield dao.save(body);
+			response.status(200).send('success');
+		} catch (e) {
+			response.status(500).jsonp(e);
+		}
 	}
 
 	*deleteFromCollection(request, response) {
-		response.jsonp({ type: 'success', message: 'hello generators!' });
+		const params = request.params;
+		const dao = new GenericDAO(params.collection);
+		const body = request.body;
+		try {
+			yield dao.remove(body);
+			response.status(200).send('success');
+		} catch (e) {
+			response.status(500).jsonp(e);
+		}
 	}
 }
 module.exports = CollectionResource;
