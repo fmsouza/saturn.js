@@ -1,0 +1,46 @@
+{
+  "name": "nodelicious",
+  "version": "1.1.0",
+  "description": "A simple HTTP server written with ECMAScript 6",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/",
+    "start": "node src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/fmsouza/nodelicious"
+  },
+  "compiler": "commonjs",
+  "keywords": [
+    "es6",
+    "ECMAscript6",
+    "nodejs",
+    "node",
+    "desktop",
+    "server",
+    "wrapper",
+    "infrastructure"
+  ],
+  "author": "Fred Souza <fredericoamsouza@gmail.com> (http://fmsouza.github.io)",
+  "license": "GNU-GPL v2",
+  "bugs": {
+    "url": "https://github.com/fmsouza/nodelicious/issues"
+  },
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "co": "^4.6.0",
+    "co-express": "^1.2.1",
+    "compression": "^1.5.2",
+    "express": "^4.13.3",
+    "fs-extra": "^0.26.0",
+    "helmet": "^0.14.0",
+    "mongodb": "^1.4.4",
+    "request-promise": "^1.0.2",
+    "robe": "^0.12.0"
+  },
+  "devDependencies": {
+    "co-mocha": "^1.1.2",
+    "mocha": "^2.3.3"
+  }
+}
