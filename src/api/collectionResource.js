@@ -9,10 +9,10 @@ class CollectionResource {
 	get base() { return '/:collection'; }
 
 	constructor(router) {
-		router.get('/:collection', wrap(this.getFromCollection));
-		router.post('/:collection', wrap(this.postToCollection));
-		router.put('/:collection', wrap(this.putToCollection));
-		router.delete('/:collection', wrap(this.deleteFromCollection));
+		router.get(this.base, wrap(this.getFromCollection));
+		router.post(this.base, wrap(this.postToCollection));
+		router.put(this.base, wrap(this.putToCollection));
+		router.delete(this.base, wrap(this.deleteFromCollection));
 		// let driver = new ServerDriver();
 		// let resource = new SortResource(driver);
 		// router.use(resource.base, driver);
