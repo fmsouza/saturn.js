@@ -35,12 +35,12 @@ class Router {
      */
     registerResources(resources) {
         let root = Config.root;
-        for(var res of resources) {
+        for(let res of resources) {
             let Resource = require(`${root}/${res}`);
-            var session = new ServerDriver();
+            let session = new ServerDriver();
             let resource = new Resource(session);
             this.driver.use(resource.base, session);
-            logger.info(`Resource registered: ${res}`);
+            logger.info(`Resource ${res} registered for route ${resource.base}`);
         }
     }
 
