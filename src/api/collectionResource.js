@@ -1,21 +1,16 @@
 'use strict';
 const wrap = require('co-express');
-const ServerDriver = require('express');
-const PagingResource = require('./pagingResource');
 const GenericDAO   = require('../dao/genericDAO');
 
 class CollectionResource {
 
-	get base() { return '/:collection'; }
+	get base() { return '/'; }
 
 	constructor(router) {
-		router.get(this.base, wrap(this.getFromCollection));
-		router.post(this.base, wrap(this.postToCollection));
-		router.put(this.base, wrap(this.putToCollection));
-		router.delete(this.base, wrap(this.deleteFromCollection));
-		// let driver = new ServerDriver();
-		// new PagingResource(driver);
-		// router.use(this.base, driver);
+		router.get('/:collection', wrap(this.getFromCollection));
+		router.post('/:collection', wrap(this.postToCollection));
+		router.put('/:collection', wrap(this.putToCollection));
+		router.delete('/:collection', wrap(this.deleteFromCollection));
 	}
 
 	*getFromCollection(request, response) {
@@ -29,8 +24,7 @@ class CollectionResource {
 			data = yield dao.find(body.data, options);
 			response.status(200).jsonp(data);
 		} catch (e) {
-			console.log(e);
-			response.status(500).jsonp(e);
+			response.status(500).jsonp(e.toString());
 		}
 	}
 
@@ -40,7 +34,7 @@ class CollectionResource {
 			const data = yield dao.save(request.body);
 			response.status(200).jsonp(data);
 		} catch (e) {
-			response.status(500).jsonp(e);
+			response.status(500).jsonp(e.toString());
 		}
 	}
 
@@ -52,7 +46,7 @@ class CollectionResource {
 			yield dao.save(body);
 			response.status(200).send('success');
 		} catch (e) {
-			response.status(500).jsonp(e);
+			response.status(500).jsonp(e.toString());
 		}
 	}
 
@@ -64,7 +58,7 @@ class CollectionResource {
 			yield dao.remove(body);
 			response.status(200).send('success');
 		} catch (e) {
-			response.status(500).jsonp(e);
+			response.status(500).jsonp(e.toString());
 		}
 	}
 }
