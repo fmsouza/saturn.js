@@ -4,7 +4,7 @@
   "description": "A simple HTTP server written with ECMAScript 6",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/",
+    "test": "mocha test/ test/**/*",
     "start": "node src/app.js"
   },
   "repository": {
@@ -40,7 +40,6 @@
     "robe": "^0.12.0"
   },
   "devDependencies": {
-    "co-mocha": "^1.1.2",
-    "mocha": "^2.3.3"
+    "mocha-co": "^1.17.1-co.1"
   }
 }
