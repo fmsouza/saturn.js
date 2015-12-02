@@ -20,5 +20,8 @@ module.exports = {
         user: process.env.NODEJS_DB_USER    || '',
         pass: process.env.NODEJS_DB_PASS    || ''
     },
-    resources: [ 'api/mainResource' ]
+    resources: [
+        'api/collectionResource',
+        'api/pagingResource'
+    ]
 };
