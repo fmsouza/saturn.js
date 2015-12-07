@@ -1,8 +1,8 @@
 {
-  "name": "nodelicious",
-  "version": "1.1.0",
-  "description": "A simple HTTP server written with ECMAScript 6",
-  "main": "index.js",
+  "name": "saturn.js",
+  "version": "0.1.0",
+  "description": "HTTP/PubSub dynamic Web Server",
+  "main": "src/app.js",
   "scripts": {
     "test": "mocha test/ test/**/*",
     "start": "node src/app.js"
@@ -13,14 +13,7 @@
   },
   "compiler": "commonjs",
   "keywords": [
-    "es6",
-    "ECMAscript6",
-    "nodejs",
-    "node",
-    "desktop",
-    "server",
-    "wrapper",
-    "infrastructure"
+    "es6", "ECMAscript6", "nodejs", "node", "desktop", "server", "wrapper", "infrastructure", "http", "rest", "pubsub"
   ],
   "author": "Fred Souza <fredericoamsouza@gmail.com> (http://fmsouza.github.io)",
   "license": "GNU-GPL v2",
