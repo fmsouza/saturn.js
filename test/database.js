@@ -1,52 +1,47 @@
 'use strict';
 /* global describe, it, before; */
-require('co-mocha')(require('mocha'));
 
 const Assert = require('assert');
 const Database = require('../src/core').Database;
+const Model = Database.Model;
 
-var db, collection;
+class Test extends Model {
+	get title() { return this.get('title'); }
+	set title(value) { this.set('title', value); }
+	get foo() { return this.get('foo'); }
+	set foo(value) { this.set('foo', value); }
+}
+
+var test;
 
 describe('Database', () => {
 	
-	it('should connect to database', function*(done) {
-		db = yield Database.connect();
-		Assert.notEqual(db, null);
-		done();
-	});
+	before(function*() { yield Database.connect(); });
 	
-	it('should access the collection test', function*(done) {
-		collection = db.collection('test');
-		Assert.notEqual(collection, null);
-		done();
-	});
-	
-	it('should insert data in the collection', function*(done) {
-		yield collection.insert({ name: 'Fulano' });
+	it('should insert data in the collection tests', function*() {
+		test = new Test({ title: 'Fulano' });
+		yield test.save();
 		
-		var item = yield collection.findOne({ name: 'Fulano' });
-		Assert.equal(item.name, 'Fulano');
-		done();
+		const item = yield Test.findOne({title: 'Fulano'});
+		Assert.equal(item.title, 'Fulano');
 	});
 	
-	it('should update Fulano in the collection', function*(done) {
-		var item = yield collection.findOne({ name: 'Fulano' });
-		item.name = 'Ciclano';
-		yield item.save();
-		Assert.equal(item.name, 'Ciclano');
-		done();
+	it('should update data in the collection tests', function*() {
+		test.foo = 'bar';
+		yield test.save();
+		
+		const item = yield Test.findOne({title: 'Fulano'});
+		Assert.equal(item.foo, 'bar');
 	});
 	
-	it('should retrieve all documents in test collection', function*(done) {
-		var items = yield collection.find({});
-		Assert.notEqual(items.length, 0);
-		done();
+	it('should retrieve all documents in the collection tests', function*() {
+		const items = yield Test.find();
+		Assert.equal(items.length, 1);
 	});
 	
-	it('should remove all documents in test collection', function*(done) {
-		yield collection.remove({});
-		var items = yield collection.find({});
+	it('should remove all the data in the collection tests', function*() {
+		yield test.remove();
+		const items = yield Test.find();
 		Assert.equal(items.length, 0);
-		done();
 	});
 });
