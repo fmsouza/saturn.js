@@ -1,6 +1,7 @@
 'use strict';
 const wrap = require('co-express');
-const GenericDAO   = require('../dao/genericDAO');
+const Database = require('../core/database');
+const Collection = require('../collectionModel');
 
 class CollectionResource {
 
@@ -14,14 +15,16 @@ class CollectionResource {
 	}
 
 	*getFromCollection(request, response) {
-		const dao = new GenericDAO(request.params.collection);
+		Collection.collectionName = request.params.collection;
 		const body = request.body || {};
-		const options = { sort: { _id: 1 } };
-		if(body.sort) options.sort = body.sort;
-		let data = [];
+		let query = Collection.where(body.data);
 		
+		if(body.sort) {
+			let sort = Object.keys(body.sort)[0];
+			query = query.sort(sort, body.sort[sort]);
+		}
 		try {
-			data = yield dao.find(body.data, options);
+			let data = yield query.find();
 			response.status(200).jsonp(data);
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
@@ -29,21 +32,23 @@ class CollectionResource {
 	}
 
 	*postToCollection(request, response) {
-		const dao = new GenericDAO(request.params.collection);
+		Collection.collectionName = request.params.collection;
 		try {
-			const data = yield dao.save(request.body);
-			response.status(200).jsonp(data);
+			let obj = new Collection(request.body);
+			yield obj.save();
+			response.status(200).jsonp(obj);
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
 		}
 	}
 
 	*putToCollection(request, response) {
-		const params = request.params;
-		const dao = new GenericDAO(params.collection);
+		Collection.collectionName = request.params.collection;
 		const body = request.body;
+		let obj = yield Collection.findById(body._id);
+		for (let key of Object.keys(body)) obj.set(key, body[key]);
 		try {
-			yield dao.save(body);
+			yield obj.save();
 			response.status(200).send('success');
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
@@ -51,11 +56,10 @@ class CollectionResource {
 	}
 
 	*deleteFromCollection(request, response) {
-		const params = request.params;
-		const dao = new GenericDAO(params.collection);
+		Collection.collectionName = request.params.collection;
 		const body = request.body;
 		try {
-			yield dao.remove(body);
+			yield Collection.remove(body);
 			response.status(200).send('success');
 		} catch (e) {
 			response.status(500).jsonp(e.toString());

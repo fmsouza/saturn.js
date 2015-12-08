@@ -6,6 +6,7 @@ const Assert    = require('assert');
 const Core      = require(`${base}/core`);
 const Config	= require(`${base}/config`);
 const Database  = Core.Database;
+const Model		= Database.Model;
 const Http	    = Core.Http;
 const Router    = Core.Router;
 
@@ -20,7 +21,6 @@ describe('API HTTP Collection', () => {
 		host = `http://${serverConfig.ip}:${serverConfig.port}`;
 		
 		yield Database.connect();
-		
 		let router = new Router();
 		router.registerResources(Config.resources);
 		server = router.start(serverConfig.ip, serverConfig.port);

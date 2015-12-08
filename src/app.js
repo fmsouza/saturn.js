@@ -13,7 +13,7 @@ const Process = process;
 spawn(function* main(){
     logger.info('Starting the server...');
     
-    global.database = yield Database.connect(); // Creating connection to database
+    yield Database.connect(); // Creating connection to database
 
     // Configuring the RESTful router to handle HTTP requests
     let router = new Router();
