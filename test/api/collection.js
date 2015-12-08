@@ -19,18 +19,18 @@ describe('API HTTP Collection', () => {
 		const serverConfig = Config.server;
 		host = `http://${serverConfig.ip}:${serverConfig.port}`;
 		
-		global.database = yield Database.connect();
+		yield Database.connect();
 		
 		let router = new Router();
 		router.registerResources(Config.resources);
 		server = router.start(serverConfig.ip, serverConfig.port);
 	});
 	
-	it('should insert a new document in the collection \'test\' by doing a POST request to \'/test\' with the data', function*() {
+	it('should insert a new document in the collection \'tests\' by doing a POST request to \'/tests\' with the data', function*() {
 		let obj = { foo: 'bar' };
 		let data;
 		try {
-			var output = yield Http.post(`${host}/test`, obj);
+			var output = yield Http.post(`${host}/tests`, obj);
 			data = output.body;
 		} catch(e) {
 			data = e;
@@ -41,12 +41,12 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	it('should update a document in the collection \'test\' by doing a PUT request to \'/test\' with the data including the \'_id\' in the body', function*() {
+	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		obj.bar = 'foo';
 		let data;
 		try {
-			var output = yield Http.put(`${host}/test`, obj);
+			var output = yield Http.put(`${host}/tests`, obj);
 			data = output.body;
 		} catch(e) {
 			data = e;
@@ -55,10 +55,10 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	it('should get the documents which match to the given query on the collection \'test\' by doing a GET request to \'/test\' with the data to query in the body', function*() {
+	it('should get the documents which match to the given query on the collection \'tests\' by doing a GET request to \'/tests\' with the data to query in the body', function*() {
 		let data;
 		try {
-			var output = yield Http.get(`${host}/test`, savedObj);
+			var output = yield Http.get(`${host}/tests`, savedObj);
 			data = output.body;
 		} catch(e) {
 			data = e;
@@ -68,10 +68,10 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	it('should get a list with all documents on the collection \'test\' by doing a GET request to \'/test\'', function*() {
+	it('should get a list with all documents on the collection \'tests\' by doing a GET request to \'/tests\'', function*() {
 		let data;
 		try {
-			var output = yield Http.get(`${host}/test`);
+			var output = yield Http.get(`${host}/tests`);
 			data = output.body;
 		} catch(e) {
 			data = e;
@@ -82,11 +82,11 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	it('should get a list with all documents on the collection \'test\', ordered by the field \'foo\', by doing a GET request to \'/test\'', function*() {
+	it('should get a list with all documents on the collection \'tests\', ordered by the field \'foo\', by doing a GET request to \'/tests\'', function*() {
 		let data;
 		const body = { sort: { foo: 1 } }
 		try {
-			var output = yield Http.get(`${host}/test`, body);
+			var output = yield Http.get(`${host}/tests`, body);
 			data = output.body;
 		} catch(e) {
 			data = e;
@@ -97,11 +97,11 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	it('should delete a document in the collection \'test\' by doing a DELETE request to \'/test\' with the data to query for the document in the body', function*() {
+	it('should delete a document in the collection \'tests\' by doing a DELETE request to \'/tests\' with the data to query for the document in the body', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		let data;
 		try {
-			var output = yield Http.delete(`${host}/test`, obj);
+			var output = yield Http.delete(`${host}/tests`, obj);
 			data = output.body;
 		} catch(e) {
 			data = e;
@@ -110,7 +110,5 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	after(() => {
-		server.close();
-	});
+	after(() => { server.close(); });
 });
