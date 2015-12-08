@@ -1,15 +1,16 @@
 {
   "name": "saturn.js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "HTTP/PubSub dynamic Web Server",
   "main": "src/app.js",
   "scripts": {
     "test": "mocha test/ test/**/*",
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "install": "npm install -g mocha-co"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/fmsouza/nodelicious"
+    "url": "http://github.com/fmsouza/saturn.js"
   },
   "compiler": "commonjs",
   "keywords": [
@@ -18,7 +19,7 @@
   "author": "Fred Souza <fredericoamsouza@gmail.com> (http://fmsouza.github.io)",
   "license": "GNU-GPL v2",
   "bugs": {
-    "url": "https://github.com/fmsouza/nodelicious/issues"
+    "url": "https://github.com/fmsouza/saturn.js/issues"
   },
   "dependencies": {
     "body-parser": "^1.14.1",
@@ -29,8 +30,8 @@
     "fs-extra": "^0.26.0",
     "helmet": "^0.14.0",
     "mongodb": "^1.4.4",
-    "request-promise": "^1.0.2",
-    "robe": "^0.12.0"
+    "mongorito": "^1.4.3",
+    "request-promise": "^1.0.2"
   },
   "devDependencies": {
     "mocha-co": "^1.17.1-co.1"
