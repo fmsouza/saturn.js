@@ -35,13 +35,14 @@ describe('API HTTP Collection', () => {
 		let data;
 		try {
 			var output = yield Http.post(`${host}/tests`, obj);
-			data = output.body;
+			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data instanceof Object, true);
-			Assert.equal(data.foo, obj.foo);
-			savedObj = data;
+			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Object, true);
+			Assert.equal(data.body.foo, obj.foo);
+			savedObj = data.body;
 		}
 	});
 	
@@ -51,11 +52,11 @@ describe('API HTTP Collection', () => {
 		let data;
 		try {
 			var output = yield Http.put(`${host}/tests`, obj);
-			data = output.body;
+			data = output.statusCode;
 		} catch(e) {
-			data = e;
+			data = e.statusCode;
 		} finally {
-			Assert.equal(data, 'success');
+			Assert.equal(data, 200);
 		}
 	});
 	
@@ -63,12 +64,13 @@ describe('API HTTP Collection', () => {
 		let data;
 		try {
 			var output = yield Http.get(`${host}/tests`, savedObj);
-			data = output.body;
+			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data instanceof Object, true);
-			Assert.equal(data[0].foo, 'bar');
+			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Object, true);
+			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});
 	
@@ -76,13 +78,14 @@ describe('API HTTP Collection', () => {
 		let data;
 		try {
 			var output = yield Http.get(`${host}/tests`);
-			data = output.body;
+			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data instanceof Array, true);
-			Assert.equal(data.length, 1);
-			Assert.equal(data[0].foo, 'bar');
+			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Array, true);
+			Assert.equal(data.body.length, 1);
+			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});
 	
@@ -91,13 +94,14 @@ describe('API HTTP Collection', () => {
 		const body = { sort: { foo: 1 } }
 		try {
 			var output = yield Http.get(`${host}/tests`, body);
-			data = output.body;
+			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data instanceof Array, true);
-			Assert.equal(data.length, 1);
-			Assert.equal(data[0].foo, 'bar');
+			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Array, true);
+			Assert.equal(data.body.length, 1);
+			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});
 	
@@ -105,11 +109,36 @@ describe('API HTTP Collection', () => {
 		let data;
 		try {
 			var output = yield Http.delete(`${host}/tests`, savedObj);
-			data = output.body;
+			data = output.statusCode;
 		} catch(e) {
-			data = e;
+			data = e.statusCode;
 		} finally {
-			Assert.equal(data, 'success');
+			Assert.equal(data, 200);
+		}
+	});
+	
+	it('should fail get the documents on the collection \'foo\' by doing a GET request because \'/foo\' the method is not publicly allowed', function*() {
+		let data;
+		try {
+			var output = yield Http.get(`${host}/foo`, savedObj);
+			data = output.statusCode;
+		} catch(e) {
+			data = e.statusCode;
+		} finally {
+			Assert.equal(data, 400);
+		}
+	});
+	
+	it('should fail to insert a new document in the collection \'foo\' by doing a POST request to \'/foo\' because the method is not allowed', function*() {
+		let obj = { foo: 'bar' };
+		let data;
+		try {
+			var output = yield Http.post(`${host}/foo`, obj);
+			data = output.statusCode;
+		} catch(e) {
+			data = e.statusCode;
+		} finally {
+			Assert.equal(data, 400);
 		}
 	});
 	

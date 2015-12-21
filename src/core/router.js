@@ -47,8 +47,10 @@ class Router {
                     if(methodIsPublic) {
                         yield resource[request.method](request, response);
                     } else {
-                        response.status(400).send(`Method ${request.method} is not allowed for ${request.url}.`);
+                        response.status(400).send(`Method ${request.method} is not publicly allowed for ${request.url}.`);
                     }
+                } else {
+                    response.status(400).send(`Method ${request.method} is not allowed for ${request.url}.`);
                 }
             } else next();
         }));

@@ -20,6 +20,9 @@
             "POST":   { "public": true },
             "PUT":    { "public": true },
             "DELETE": { "public": true }
+        },
+        "/foo": {
+            "GET":    { "public": false }
         }
     }
 }
