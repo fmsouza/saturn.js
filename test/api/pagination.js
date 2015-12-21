@@ -1,6 +1,8 @@
 'use strict';
 /* global describe, it, before, after, global, __dirname; */
 
+const testConfig = `${__dirname}/../test-config.json`;
+
 const base = `${__dirname}/../../src`;
 const Assert    = require('assert');
 const Core      = require(`${base}/core`);
@@ -9,6 +11,7 @@ const Database  = Core.Database;
 const Model		= Database.Model;
 const Http	    = Core.Http;
 const Router    = Core.Router;
+const File      = Core.File;
 
 var router;
 
@@ -22,30 +25,32 @@ describe('API HTTP Collection with Pagination', () => {
 	let server, host;
 	
 	before(function*() {
-		const serverConfig = Config.server;
-		host = `http://${serverConfig.ip}:${serverConfig.port}`;
+        let config = JSON.parse((new File(testConfig)).read());
+		const serverConfig = config['api-configuration'];
+		const dbConfig = config['server-configuration'];
+		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
-		yield Database.connect();
+		yield Database.connect(dbConfig);
 		for(let i = 0; i<10; i++) yield (new Test({ value: i })).save();
-		
-		let router = new Router();
-		router.registerResources(Config.resources);
-		server = router.start(serverConfig.ip, serverConfig.port);
+        
+		let router = new Router(config);
+		server = router.start(serverConfig.host, serverConfig.port);
 	});
 	
 	it('should get a block of 3 documents on the collection \'tests\' by doing a GET request to \'/tests/page/3/1\'', function*() {
 		let data;
 		try {
 			var output = yield Http.get(`${host}/tests/page/3/1`);
-			data = output.body;
+			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data instanceof Array, true);
-			Assert.equal(data.length, 3);
-			Assert.equal(data[0].value, 0);
-			Assert.equal(data[1].value, 1);
-			Assert.equal(data[2].value, 2);
+            Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Array, true);
+			Assert.equal(data.body.length, 3);
+			Assert.equal(data.body[0].value, 0);
+			Assert.equal(data.body[1].value, 1);
+			Assert.equal(data.body[2].value, 2);
 		}
 	});
 	
@@ -53,17 +58,18 @@ describe('API HTTP Collection with Pagination', () => {
 		let data;
 		try {
 			var output = yield Http.get(`${host}/tests/page/5/2`);
-			data = output.body;
+			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data instanceof Array, true);
-			Assert.equal(data.length, 5);
-			Assert.equal(data[0].value, 5);
-			Assert.equal(data[1].value, 6);
-			Assert.equal(data[2].value, 7);
-			Assert.equal(data[3].value, 8);
-			Assert.equal(data[4].value, 9);
+            Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Array, true);
+			Assert.equal(data.body.length, 5);
+			Assert.equal(data.body[0].value, 5);
+			Assert.equal(data.body[1].value, 6);
+			Assert.equal(data.body[2].value, 7);
+			Assert.equal(data.body[3].value, 8);
+			Assert.equal(data.body[4].value, 9);
 		}
 	});
 	

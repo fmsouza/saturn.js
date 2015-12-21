@@ -35,10 +35,11 @@ class Router {
         const accessPolicy = this.config['access-policy'];
         const resource = new GenericResource();
         this.driver.use(wrapper(function*(request, response, next) {
-            const policyAllowsRoute = accessPolicy.hasOwnProperty(request.url);
-            logger.info(`Policy allows requests to '${request.url}': ${policyAllowsRoute}`);
+            let api = request.url.split('/')[1];
+            const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${api}`);
+            logger.info(`Policy allows requests to '/${api}': ${policyAllowsRoute}`);
             if(policyAllowsRoute) {
-                let access = accessPolicy[request.url];
+                let access = accessPolicy[`/${api}`];
                 const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
                 logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
                 if(policyAllowsMethod) {
@@ -46,13 +47,10 @@ class Router {
                     logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
                     if(methodIsPublic) {
                         yield resource[request.method](request, response);
-                    } else {
-                        response.status(400).send(`Method ${request.method} is not publicly allowed for ${request.url}.`);
-                    }
-                } else {
-                    response.status(400).send(`Method ${request.method} is not allowed for ${request.url}.`);
-                }
-            } else next();
+                    } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${api}'.`);
+                } else response.status(404).send(`Method ${request.method} is not allowed for '/${api}'.`);
+            } else response.status(404).send(`Route '/${api}' does not exist.`); 
+            next();
         }));
     }
 

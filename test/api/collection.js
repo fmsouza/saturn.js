@@ -138,7 +138,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e.statusCode;
 		} finally {
-			Assert.equal(data, 400);
+			Assert.equal(data, 404);
 		}
 	});
 	
