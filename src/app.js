@@ -5,22 +5,33 @@ const Core          = require('./core');
 const LoggerFactory = Core.LoggerFactory;
 const Router        = Core.Router;
 const Database      = Core.Database;
+const File          = Core.File;
 const spawn         = require('co');
 
 const logger = LoggerFactory.getRuntimeLogger();
 const Process = process;
+global.Log = logger;
+let configContent;
+
+if(process.argv.length<3) {
+    logger.error('You must provide a config file to start the server.');
+}
+try {
+    configContent = (new File(Process.argv[2])).read();
+} catch(e) {
+    logger.error('The provided config file does not exist.');
+}
 
 spawn(function* main(){
     logger.info('Starting the server...');
-    
-    yield Database.connect(); // Creating connection to database
+    let config = JSON.parse(configContent);
+    let dbConfig = config['server-configuration'];
+    yield Database.connect(dbConfig); // Creating connection to database
 
     // Configuring the RESTful router to handle HTTP requests
-    let router = new Router();
-    router.registerResources(Config.resources); // Registering resources to handle the URLs
-    
-    let server = Config.server;
-    router.start(server.ip, server.port); // Starting RESTful application
+    let router = new Router(config);
+    let server = config['api-configuration'];
+    router.start(server.host, server.port); // Starting RESTful application
 })
 .catch(function(error) {
     logger.error(error);

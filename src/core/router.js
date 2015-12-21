@@ -2,9 +2,12 @@
 const LoggerFactory = require('./log/loggerFactory');
 const Config  = require('../config');
 const ServerDriver = require('express');
+const wrapper = require('co-express');
 const BodyParser = require("body-parser");
 const compression = require('compression');
 const helmet = require('helmet');
+const GenericResource = require('../api/genericResource');
+
 let logger = LoggerFactory.getServerLogger();
 
 /**
@@ -14,7 +17,8 @@ let logger = LoggerFactory.getServerLogger();
  */
 class Router {
 
-    constructor(){
+    constructor(config) {
+        this.config = config;
         this.driver = new ServerDriver();
         this.driver.use(compression());
         this.driver.use(helmet());
@@ -23,25 +27,31 @@ class Router {
         this.driver.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-            res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            res.header("Access-Control-Allow-Methods", config.methods.join(','));
             logger.info(`Serving route ${req.url} (${req.method})`);
             next();
         });
-    }
-
-    /**
-     * Registers a list of resources to handle routes
-     * @param {Array} resources
-     */
-    registerResources(resources) {
-        let root = Config.root;
-        for(let res of resources) {
-            let Resource = require(`${root}/${res}`);
-            let session = new ServerDriver();
-            let resource = new Resource(session);
-            this.driver.use(resource.base, session);
-            logger.info(`Resource ${res} registered for route ${resource.base}`);
-        }
+        
+        const accessPolicy = this.config['access-policy'];
+        const resource = new GenericResource();
+        this.driver.use(wrapper(function*(request, response, next) {
+            const policyAllowsRoute = accessPolicy.hasOwnProperty(request.url);
+            logger.info(`Policy allows requests to '${request.url}': ${policyAllowsRoute}`);
+            if(policyAllowsRoute) {
+                let access = accessPolicy[request.url];
+                const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
+                logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
+                if(policyAllowsMethod) {
+                    const methodIsPublic = access[request.method].public;
+                    logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
+                    if(methodIsPublic) {
+                        yield resource[request.method](request, response);
+                    } else {
+                        response.status(400).send(`Method ${request.method} is not allowed for ${request.url}.`);
+                    }
+                }
+            } else next();
+        }));
     }
 
     /**
