@@ -29,3 +29,4 @@ node_modules
 .lock-wscript
 .idea
 .vscode
+.DS_Store
