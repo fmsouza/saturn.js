@@ -7,8 +7,54 @@ const BodyParser = require("body-parser");
 const compression = require('compression');
 const helmet = require('helmet');
 const GenericResource = require('../api/genericResource');
+const UserResource = require('../api/userResource');
 
 let logger = LoggerFactory.getServerLogger();
+
+function* readFromConfig(route, request, response, resource, accessPolicy) {
+    const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${route}`);
+    logger.info(`Policy allows requests to '/${route}': ${policyAllowsRoute}`);
+    if(policyAllowsRoute) {
+        let access = accessPolicy[`/${route}`];
+        const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
+        logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
+        if(policyAllowsMethod) {
+            const methodIsPublic = access[request.method].public;
+            logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
+            if(methodIsPublic) {
+                yield resource[request.method](request, response);
+            } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${route}'.`);
+        } else response.status(404).send(`Method ${request.method} is not allowed for '/${route}'.`);
+    } else response.status(404).send(`Route '/${route}' does not exist.`);
+}
+
+function *forwardRoute(request, response, resource, config) {
+    let userConfig = config['users'];
+    let tmp = new UserResource(userConfig);
+    let route = request.url.split('/')[1];
+    let method = request.method;
+    switch(route) {
+        case 'signup':
+            console.log('Entrei no signup');
+            if(method==='POST') {
+                response.status(404).send('Method not available yet.');
+            }
+            break;
+        case 'signin':
+            if(method==='POST') {
+                response.status(404).send('Method not available yet.');
+            }
+            break;
+        case 'signoff':
+            if(method==='POST') {
+                response.status(404).send('Method not available yet.');
+            }
+            break;
+        default:
+            yield readFromConfig(route, request, response, resource, config['access-policy']);
+            break;
+    }
+}
 
 /**
  * Class Router represents the RESTful router, which
@@ -32,25 +78,26 @@ class Router {
             next();
         });
         
-        const accessPolicy = this.config['access-policy'];
+        //const accessPolicy = this.config['access-policy'];
         const resource = new GenericResource();
         this.driver.use(wrapper(function*(request, response, next) {
-            let api = request.url.split('/')[1];
-            const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${api}`);
-            logger.info(`Policy allows requests to '/${api}': ${policyAllowsRoute}`);
-            if(policyAllowsRoute) {
-                let access = accessPolicy[`/${api}`];
-                const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
-                logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
-                if(policyAllowsMethod) {
-                    const methodIsPublic = access[request.method].public;
-                    logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
-                    if(methodIsPublic) {
-                        yield resource[request.method](request, response);
-                    } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${api}'.`);
-                } else response.status(404).send(`Method ${request.method} is not allowed for '/${api}'.`);
-            } else response.status(404).send(`Route '/${api}' does not exist.`); 
-            next();
+            yield forwardRoute(request, response, resource, config);
+        //     let api = request.url.split('/')[1];
+        //     const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${api}`);
+        //     logger.info(`Policy allows requests to '/${api}': ${policyAllowsRoute}`);
+        //     if(policyAllowsRoute) {
+        //         let access = accessPolicy[`/${api}`];
+        //         const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
+        //         logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
+        //         if(policyAllowsMethod) {
+        //             const methodIsPublic = access[request.method].public;
+        //             logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
+        //             if(methodIsPublic) {
+        //                 yield resource[request.method](request, response);
+        //             } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${api}'.`);
+        //         } else response.status(404).send(`Method ${request.method} is not allowed for '/${api}'.`);
+        //     } else response.status(404).send(`Route '/${api}' does not exist.`); 
+        //     next();
         }));
     }
 
