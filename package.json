@@ -14,7 +14,17 @@
   },
   "compiler": "commonjs",
   "keywords": [
-    "es6", "ECMAscript6", "nodejs", "node", "desktop", "server", "wrapper", "infrastructure", "http", "rest", "pubsub"
+    "es6",
+    "ECMAscript6",
+    "nodejs",
+    "node",
+    "desktop",
+    "server",
+    "wrapper",
+    "infrastructure",
+    "http",
+    "rest",
+    "pubsub"
   ],
   "author": "Fred Souza <fredericoamsouza@gmail.com> (http://fmsouza.github.io)",
   "license": "GNU-GPL v2",
@@ -29,6 +39,7 @@
     "express": "^4.13.3",
     "fs-extra": "^0.26.0",
     "helmet": "^0.14.0",
+    "jsonwebtoken": "^5.4.1",
     "mongodb": "^1.4.4",
     "mongorito": "^1.4.3",
     "request-promise": "^1.0.2"
