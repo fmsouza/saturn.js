@@ -40,7 +40,7 @@ describe('API HTTP Users', () => {
 			data = e;
 		} finally {
 			Assert.equal(data.statusCode, 200);
-            Assert.equal(data.body, 'success');
+            Assert.equal(data.body.email, email);
 		}
 	});
 	

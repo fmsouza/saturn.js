@@ -24,7 +24,7 @@ function* readFromConfig(route, request, response, resource, accessPolicy) {
             if(methodIsPublic) {
                 yield resource[request.method](request, response);
             } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${route}'.`);
-        } else response.status(404).send(`Method ${request.method} is not allowed for '/${route}'.`);
+        } else response.status(400).send(`Method ${request.method} is not allowed for '/${route}'.`);
     } else response.status(404).send(`Route '/${route}' does not exist.`);
 }
 
@@ -35,20 +35,16 @@ function *forwardRoute(request, response, resource, config) {
     let method = request.method;
     switch(route) {
         case 'signup':
-            console.log('Entrei no signup');
-            if(method==='POST') {
-                response.status(404).send('Method not available yet.');
-            }
+            if(method==='POST') yield tmp.signup(request, response);
+            else response.status(400).send(`Method ${request.method} is not allowed for '/signup'.`);
             break;
         case 'signin':
-            if(method==='POST') {
-                response.status(404).send('Method not available yet.');
-            }
+            if(method==='POST') yield tmp.signin(request, response);
+            else response.status(400).send(`Method ${request.method} is not allowed for '/signin'.`);
             break;
         case 'signoff':
-            if(method==='POST') {
-                response.status(404).send('Method not available yet.');
-            }
+            if(method==='POST') yield tmp.signoff(request, response);
+            else response.status(400).send(`Method ${request.method} is not allowed for '/signoff'.`);
             break;
         default:
             yield readFromConfig(route, request, response, resource, config['access-policy']);
@@ -82,22 +78,6 @@ class Router {
         const resource = new GenericResource();
         this.driver.use(wrapper(function*(request, response, next) {
             yield forwardRoute(request, response, resource, config);
-        //     let api = request.url.split('/')[1];
-        //     const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${api}`);
-        //     logger.info(`Policy allows requests to '/${api}': ${policyAllowsRoute}`);
-        //     if(policyAllowsRoute) {
-        //         let access = accessPolicy[`/${api}`];
-        //         const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
-        //         logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
-        //         if(policyAllowsMethod) {
-        //             const methodIsPublic = access[request.method].public;
-        //             logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
-        //             if(methodIsPublic) {
-        //                 yield resource[request.method](request, response);
-        //             } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${api}'.`);
-        //         } else response.status(404).send(`Method ${request.method} is not allowed for '/${api}'.`);
-        //     } else response.status(404).send(`Route '/${api}' does not exist.`); 
-        //     next();
         }));
     }
 
