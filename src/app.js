@@ -25,7 +25,7 @@ try {
 spawn(function* main(){
     logger.info('Starting the server...');
     let config = JSON.parse(configContent);
-    let dbConfig = config['server-configuration'];
+    let dbConfig = config['db-configuration'];
     yield Database.connect(dbConfig); // Creating connection to database
 
     // Configuring the RESTful router to handle HTTP requests

@@ -22,7 +22,7 @@ describe('API HTTP Collection', () => {
 	before(function*() {
         let config = JSON.parse((new File(testConfig)).read());
 		const serverConfig = config['api-configuration'];
-		const dbConfig = config['server-configuration'];
+		const dbConfig = config['db-configuration'];
 		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
 		yield Database.connect(dbConfig);
