@@ -44,5 +44,19 @@ describe('API HTTP Users', () => {
 		}
 	});
 	
+	it('should login with the created used data', function*() {
+		let user = { email: email, password: '123456' };
+		let data;
+		try {
+			var output = yield Http.post(`${host}/signin`, user);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200);
+            Assert.notEqual(data.body, null);
+		}
+	});
+	
 	after(() => { server.close(); });
 });

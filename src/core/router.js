@@ -29,8 +29,7 @@ function* readFromConfig(route, request, response, resource, accessPolicy) {
 }
 
 function *forwardRoute(request, response, resource, config) {
-    let userConfig = config['users'];
-    let tmp = new UserResource(userConfig);
+    let tmp = new UserResource(config);
     let route = request.url.split('/')[1];
     let method = request.method;
     switch(route) {
