@@ -18,8 +18,10 @@ class UserResource {
     }
 
 	*signup(request, response) {
-        const body = request.body;
 		try {
+            let body = request.body;
+            if(!body.hasOwnProperty('email') || !body.hasOwnProperty('password')) throw new Error('You must inform the user email and password');
+            body.password = Security.md5(body.password).toString();
 			let obj = new Collection(body);
 			yield obj.save();
             obj.unset('password');
@@ -43,7 +45,7 @@ class UserResource {
             return;
         }
 		try {
-            let obj = yield Collection.findOne({ username: body.username, password: body.password });
+            let obj = yield Collection.findOne({ username: body.username, password: Security.md5(body.password).toString() });
             const token = Security.generateAccessToken(obj, SECRET_KEY);
 			response.status(200).jsonp(token);
 		} catch (e) {
