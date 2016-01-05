@@ -40,7 +40,6 @@
     "express": "^4.13.3",
     "fs-extra": "^0.26.0",
     "helmet": "^0.14.0",
-    "jsonwebtoken": "^5.4.1",
     "mongodb": "^1.4.4",
     "mongorito": "^1.4.3",
     "request-promise": "^1.0.2"
