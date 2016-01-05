@@ -21,7 +21,11 @@ function* readFromConfig(route, request, response, resource, accessPolicy) {
         if(policyAllowsMethod) {
             const methodIsPublic = access[request.method].public;
             logger.info(`Method '${request.method}' is public: ${methodIsPublic}`);
-            if(methodIsPublic) {
+            if(access[request.method].hasOwnProperty('redirect')) {
+                const redirectPath = access[request.method].redirect;
+                logger.info(`Redirecting to '${redirectPath}'...`);
+                response.redirect(redirectPath);
+            } else if(methodIsPublic) {
                 yield resource[request.method](request, response);
             } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${route}'.`);
         } else response.status(400).send(`Method ${request.method} is not allowed for '/${route}'.`);

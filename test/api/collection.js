@@ -89,6 +89,21 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
+	it('should redirect to \'/tests\' API when making a request to \'/redirect\'', function*() {
+		let data;
+		try {
+			var output = yield Http.get(`${host}/redirect`);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.body instanceof Array, true);
+			Assert.equal(data.body.length, 1);
+			Assert.equal(data.body[0].foo, 'bar');
+		}
+	});
+	
 	it('should get a list with all documents on the collection \'tests\', ordered by the field \'foo\', by doing a GET request to \'/tests\'', function*() {
 		let data;
 		const body = { sort: { foo: 1 } }

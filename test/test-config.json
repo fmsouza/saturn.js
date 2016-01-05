@@ -28,6 +28,12 @@
         "/foo": {
             "GET":    { "public": false }
         },
+        "/redirect": {
+            "GET":    {
+                "public": true,
+                "redirect": "http://localhost:8080/tests"
+            }
+        },
         "/users": {
             "GET":    {
                 "public": false,
