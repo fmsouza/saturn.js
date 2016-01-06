@@ -26,7 +26,6 @@ class UserResource {
 			let obj = new Collection(body);
 			yield obj.save();
             obj.unset('password');
-            console.log("\n\nSaving:", obj, "\n\n");
 			response.status(200).jsonp(obj);
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
@@ -51,7 +50,6 @@ class UserResource {
             obj.unset('password');
             obj.unset('created_at');
             obj.unset('updated_at');
-            console.log('Found user:', obj);
             const token = Security.generateAccessToken(obj, SECRET_KEY);
             response.status(200).jsonp(token);
 		} catch (e) {

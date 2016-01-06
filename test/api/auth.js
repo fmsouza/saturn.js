@@ -72,6 +72,18 @@ describe('Authentication API', () => {
             Assert.equal(data.body.length, 0);
 		}
     });
+    
+    it('should not allow the user to access the private API using the authorization key when having no required roles', function*() {
+        let data;
+		try {
+			var output = yield Http.get(`${host}/users`, {}, { 'Authorization': token });
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 400);
+		}
+    });
 	
 	after(() => { server.close(); });
 });
