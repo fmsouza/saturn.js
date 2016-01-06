@@ -17,12 +17,9 @@ let logger = LoggerFactory.getServerLogger();
 function canAccess(token, authorizedRoles, private_key) {
     if(token!==undefined) {
         const data = Security.decryptAccessToken(token, private_key);
-        console.log("\n\n");
-        console.log('decrypted data:', data);
-        console.log("\n\n");
-        if(!data.hasOwnProperty('roles')) return true;
+        if(!data.hasOwnProperty('roles') || !authorizedRoles) return false;
         let roles = data.roles;
-        for (let role of roles) if(authorizedRoles.indexOf(role)) return true;
+        for (let role of roles) if(authorizedRoles.indexOf(role)>-1) return true;
     }
     return false;
 }

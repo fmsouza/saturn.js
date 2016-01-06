@@ -6,12 +6,12 @@ const Collection = require('../collectionModel');
 const Common = require('../common');
 const Security = Common.Security;
 
-let SECRET_KEY, apiConfig;
+let SECRET_KEY, apiConfig, userConfig;
 
 class UserResource {
     
     constructor(config) {
-        let userConfig = config['users'];
+        userConfig = config['users'];
         apiConfig = config['api-configuration'];
         SECRET_KEY = apiConfig['private-key'];
 		Collection.prototype.collection = userConfig.collection;
@@ -22,9 +22,11 @@ class UserResource {
             let body = request.body;
             if(!body.hasOwnProperty('email') || !body.hasOwnProperty('password')) throw new Error('You must inform the user email and password');
             body.password = Security.md5(body.password).toString();
+            if(!body.hasOwnProperty('roles')) body.roles = [userConfig['default-role']];
 			let obj = new Collection(body);
 			yield obj.save();
             obj.unset('password');
+            console.log("\n\nSaving:", obj, "\n\n");
 			response.status(200).jsonp(obj);
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
@@ -49,6 +51,7 @@ class UserResource {
             obj.unset('password');
             obj.unset('created_at');
             obj.unset('updated_at');
+            console.log('Found user:', obj);
             const token = Security.generateAccessToken(obj, SECRET_KEY);
             response.status(200).jsonp(token);
 		} catch (e) {

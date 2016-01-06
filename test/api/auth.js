@@ -41,6 +41,7 @@ describe('Authentication API', () => {
 		} finally {
 			Assert.equal(data.statusCode, 200);
             Assert.equal(data.body.email, email);
+            Assert.equal(data.body.roles[0], 'user');
 		}
 	});
 	
