@@ -8,10 +8,27 @@ const compression = require('compression');
 const helmet = require('helmet');
 const GenericResource = require('../api/genericResource');
 const UserResource = require('../api/userResource');
+const Common = require('../common');
+const Security = Common.Security;
+const Cache = Common.Cache;
 
 let logger = LoggerFactory.getServerLogger();
 
-function* readFromConfig(route, request, response, resource, accessPolicy) {
+function canAccess(token, authorizedRoles, private_key) {
+    if(token!==undefined) {
+        const data = Security.decryptAccessToken(token, private_key);
+        console.log("\n\n");
+        console.log('decrypted data:', data);
+        console.log("\n\n");
+        if(!data.hasOwnProperty('roles')) return true;
+        let roles = data.roles;
+        for (let role of roles) if(authorizedRoles.indexOf(role)) return true;
+    }
+    return false;
+}
+
+function* readFromConfig(route, request, response, resource, config) {
+    const accessPolicy = config['access-policy'];
     const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${route}`);
     logger.info(`Policy allows requests to '/${route}': ${policyAllowsRoute}`);
     if(policyAllowsRoute) {
@@ -26,6 +43,8 @@ function* readFromConfig(route, request, response, resource, accessPolicy) {
                 logger.info(`Redirecting to '${redirectPath}'...`);
                 response.redirect(redirectPath);
             } else if(methodIsPublic) {
+                yield resource[request.method](request, response);
+            } else if(canAccess(request.headers['authorization'], access[request.method].roles, config['api-configuration']['private-key'])) {
                 yield resource[request.method](request, response);
             } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${route}'.`);
         } else response.status(400).send(`Method ${request.method} is not allowed for '/${route}'.`);
@@ -50,7 +69,7 @@ function *forwardRoute(request, response, resource, config) {
             else response.status(400).send(`Method ${request.method} is not allowed for '/signoff'.`);
             break;
         default:
-            yield readFromConfig(route, request, response, resource, config['access-policy']);
+            yield readFromConfig(route, request, response, resource, config);
             break;
     }
 }
@@ -71,7 +90,7 @@ class Router {
         this.driver.use(BodyParser.json());
         this.driver.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
-            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
             res.header("Access-Control-Allow-Methods", config.methods.join(','));
             logger.info(`Serving route ${req.url} (${req.method})`);
             next();

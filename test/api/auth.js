@@ -13,9 +13,9 @@ const Http	    = Core.Http;
 const Router    = Core.Router;
 const File      = Core.File;
 
-var router;
+var router, token;
 
-describe('API HTTP Users', () => {
+describe('Authentication API', () => {
 	
 	let server, host, email = `${(new Date()).toISOString()}@user.com`, user;
 	
@@ -55,8 +55,22 @@ describe('API HTTP Users', () => {
 		} finally {
 			Assert.equal(data.statusCode, 200);
             Assert.notEqual(data.body, null);
+            token = data.body;
 		}
 	});
+    
+    it('should allow the user to access the private API using the authorization key', function*() {
+        let data;
+		try {
+			var output = yield Http.get(`${host}/foo`, {}, { 'Authorization': token });
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200);
+            Assert.equal(data.body.length, 0);
+		}
+    });
 	
 	after(() => { server.close(); });
 });

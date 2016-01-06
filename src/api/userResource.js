@@ -6,13 +6,13 @@ const Collection = require('../collectionModel');
 const Common = require('../common');
 const Security = Common.Security;
 
-let SECRET_KEY;
+let SECRET_KEY, apiConfig;
 
 class UserResource {
     
     constructor(config) {
         let userConfig = config['users'];
-        let apiConfig = config['api-configuration'];
+        apiConfig = config['api-configuration'];
         SECRET_KEY = apiConfig['private-key'];
 		Collection.prototype.collection = userConfig.collection;
     }
@@ -46,8 +46,11 @@ class UserResource {
         }
 		try {
             let obj = yield Collection.findOne({ username: body.username, password: Security.md5(body.password).toString() });
+            obj.unset('password');
+            obj.unset('created_at');
+            obj.unset('updated_at');
             const token = Security.generateAccessToken(obj, SECRET_KEY);
-			response.status(200).jsonp(token);
+            response.status(200).jsonp(token);
 		} catch (e) {
             response.writeHead(401, {'WWW-Authenticate': `Basic realm="Provide the email and password"`});
             response.end('Authentication failed.');

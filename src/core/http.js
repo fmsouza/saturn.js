@@ -32,8 +32,8 @@ class Http {
      * @param {Object} data - Data to be sent (Optional)
      * @returns {Promise}
      */
-    static get(host, data){
-        return Http.request({ uri: host, body: data || {} });
+    static get(host, data, headers) {
+        return Http.request({ uri: host, body: data || {}, headers: headers || {} });
     }
 
     /**
@@ -42,8 +42,8 @@ class Http {
      * @param {Object} data - Data to be sent
      * @returns {Promise}
      */
-    static post(host, data){
-        return Http.request({ method: 'POST', uri: host, body: data });
+    static post(host, data, headers) {
+        return Http.request({ method: 'POST', uri: host, body: data, headers: headers || {} });
     }
 
     /**
@@ -52,8 +52,8 @@ class Http {
      * @param {Object} data - Data to be sent
      * @returns {Promise}
      */
-    static put(host, data){
-        return Http.request({ method: 'PUT', uri: host, body: data });
+    static put(host, data, headers) {
+        return Http.request({ method: 'PUT', uri: host, body: data, headers: headers || {} });
     }
 
     /**
@@ -62,8 +62,8 @@ class Http {
      * @param {Object} data - Data to be sent (Optional)
      * @returns {Promise}
      */
-    static delete(host, data){
-        return Http.request({ method: 'DELETE', uri: host, body: data || {} });
+    static delete(host, data, headers) {
+        return Http.request({ method: 'DELETE', uri: host, body: data || {}, headers: headers || {} });
     }
 }
 module.exports = Http;

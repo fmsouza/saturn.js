@@ -2,7 +2,8 @@
     "api-configuration": {
         "host": "0.0.0.0",
         "port": "8080",
-        "private-key": "secret_key"
+        "private-key": "secret_key",
+        "cache-expire-interval": 1
     },
 	"db-configuration": {
 		"driver": "mongodb",
