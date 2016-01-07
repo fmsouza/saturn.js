@@ -56,9 +56,9 @@ function* readFromConfig(route, request, response, resource, config) {
                 logger.info(`Redirecting to '${redirectPath}'...`);
                 response.redirect(redirectPath);
             } else if(methodIsPublic) {
-                yield resource[request.method](request, response);
+                yield resource[request.method](request, response, access[request.method]);
             } else if(canAccess(request.headers['authorization'], access[request.method].roles, config['api-configuration']['private-key'])) {
-                yield resource[request.method](request, response);
+                yield resource[request.method](request, response, access[request.method]);
             } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${route}'.`);
         } else response.status(400).send(`Method ${request.method} is not allowed for '/${route}'.`);
     } else response.status(404).send(`Route '/${route}' does not exist.`);
@@ -103,7 +103,6 @@ function *forwardRoute(request, response, resource, config) {
 class Router {
 
     constructor(config) {
-        this.config = config;
         this.driver = new ServerDriver();
         this.driver.use(compression());
         this.driver.use(helmet());
@@ -117,7 +116,7 @@ class Router {
             next();
         });
         
-        const resource = new GenericResource();
+        const resource = new GenericResource(config);
         this.driver.use(wrapper(function*(request, response, next) {
             yield forwardRoute(request, response, resource, config);
         }));

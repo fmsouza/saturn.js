@@ -1,13 +1,21 @@
 'use strict';
 const Core = require('../core');
-const Database = Core.Database;
+const Common = require('../common');
 const Collection = require('../collectionModel');
+const Database = Core.Database;
+const FieldValidator = Common.FieldValidator;
+
+let accessPolicy;
 
 /**
  * GenericResource class is responsible for handling all CRUD operations, data validation and interaction with the repository.
  * @class {GenericResource}
  */
 class GenericResource {
+    
+    constructor(config) {
+        accessPolicy = config['access-policy'];
+    }
 
     /**
      * Retrieves information from the repository
@@ -15,7 +23,7 @@ class GenericResource {
      * @param {Object} response - HTTP response object data
      * @return {void}
      */
-	*GET(request, response) {
+	*GET(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
 		const body = request.body || {};
@@ -45,12 +53,17 @@ class GenericResource {
      * @param {Object} response - HTTP response object data
      * @return {void}
      */
-	*POST(request, response) {
+	*POST(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
-        const body = request.body;
+        let body = request.body;
         
 		try {
+            if(policy.hasOwnProperty('fields')) {
+                const validator = new FieldValidator(policy.fields);
+                body = validator.validate(body);
+            }
+            
 			let obj = new Collection(body);
 			yield obj.save();
 			response.status(200).jsonp(obj);
@@ -65,7 +78,7 @@ class GenericResource {
      * @param {Object} response - HTTP response object data
      * @return {void}
      */
-	*PUT(request, response) {
+	*PUT(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
 		const body = request.body;
@@ -86,7 +99,7 @@ class GenericResource {
      * @param {Object} response - HTTP response object data
      * @return {void}
      */
-	*DELETE(request, response) {
+	*DELETE(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
 		const body = request.body;

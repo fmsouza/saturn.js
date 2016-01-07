@@ -32,6 +32,17 @@
                 "roles": ["user"]
             }
         },
+        "/validating": {
+            "POST":    {
+                "public": true,
+                "fields": {
+                    "textField": { "type": "string", "required": true },
+                    "numberField": { "type": "number", "required": true },
+                    "dateField": { "type": "date", "required": false },
+                    "booleanField": { "type": "boolean", "required": true }
+                }
+            }
+        },
         "/redirect": {
             "GET":    {
                 "public": true,

@@ -156,6 +156,52 @@ describe('API HTTP Collection', () => {
 			Assert.equal(data, 400);
 		}
 	});
+    
+    it('should save documents to the collection \'validating\' by doing a POST request respecting the validation requirements', function*() {
+        let data, obj = { textField: "foo", numberField: 100, dateField: new Date(), booleanField: true };
+		try {
+			var output = yield Http.post(`${host}/validating`, obj);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200);
+            Assert.equal(data.body instanceof Object, true);
+            Assert.deepEqual(data.body.textField, obj.textField);
+            Assert.equal(typeof data.body.textField, 'string');
+            Assert.deepEqual(data.body.numberField, obj.numberField);
+            Assert.equal(typeof data.body.numberField, 'number');
+            Assert.deepEqual(data.body.dateField, obj.dateField.toISOString());
+            Assert.equal(new Date(data.body.dateField) instanceof Date, true);
+            Assert.deepEqual(data.body.booleanField, obj.booleanField);
+            Assert.equal(typeof data.body.booleanField, 'boolean');
+		}
+    });
+    
+    it('should fail to save documents to the collection \'validating\' by doing a POST request disrespecting the validation requirements', function*() {
+        let data, obj = { textField: "foo", numberField: 'wrong value', dateField: new Date(), booleanField: true };
+		try {
+			var output = yield Http.post(`${host}/validating`, obj);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 500);
+		}
+    });
+    
+    it('should fail to save documents to the collection \'validating\' by doing a POST request missing a required field', function*() {
+        let data, obj = { textField: "foo", numberField: 100 };
+		try {
+			var output = yield Http.post(`${host}/validating`, obj);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+            console.log(data.toString());
+			Assert.equal(data.statusCode, 500);
+		}
+    });
 	
 	after(() => { server.close(); });
 });
