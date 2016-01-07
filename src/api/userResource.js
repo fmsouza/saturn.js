@@ -8,6 +8,10 @@ const Security = Common.Security;
 
 let SECRET_KEY, apiConfig, userConfig;
 
+/**
+ * UserResource class is responsible for handling the user access control management.
+ * @class {UserResource}
+ */
 class UserResource {
     
     constructor(config) {
@@ -17,6 +21,12 @@ class UserResource {
 		Collection.prototype.collection = userConfig.collection;
     }
 
+    /**
+     * Signs up an new user
+     * @param {Object} request - HTTP request object data
+     * @param {Object} response - HTTP response object data
+     * @return {void}
+     */
 	*signup(request, response) {
 		try {
             let body = request.body;
@@ -32,6 +42,12 @@ class UserResource {
 		}
 	}
 
+    /**
+     * Signs in an existing user
+     * @param {Object} request - HTTP request object data
+     * @param {Object} response - HTTP response object data
+     * @return {void}
+     */
 	*signin(request, response) {
         let body;
         if(request.body.hasOwnProperty('email') && request.body.hasOwnProperty('password')) body = request.body;
@@ -59,6 +75,12 @@ class UserResource {
 		}
     }
 
+    /**
+     * Signs off an existing user
+     * @param {Object} request - HTTP request object data
+     * @param {Object} response - HTTP response object data
+     * @return {void}
+     */
 	*signoff(request, response) {
         response.status(500).send('');
     }

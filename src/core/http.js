@@ -30,6 +30,7 @@ class Http {
      * Makes GET request
      * @param {string} host - Host URL
      * @param {Object} data - Data to be sent (Optional)
+     * @param {Object} headers - Headers to be set (Optional)
      * @returns {Promise}
      */
     static get(host, data, headers) {
@@ -40,6 +41,7 @@ class Http {
      * Makes POST request
      * @param {string} host - Host URL
      * @param {Object} data - Data to be sent
+     * @param {Object} headers - Headers to be set (Optional)
      * @returns {Promise}
      */
     static post(host, data, headers) {
@@ -50,6 +52,7 @@ class Http {
      * Makes PUT request
      * @param {string} host - Host URL
      * @param {Object} data - Data to be sent
+     * @param {Object} headers - Headers to be set (Optional)
      * @returns {Promise}
      */
     static put(host, data, headers) {
@@ -60,6 +63,7 @@ class Http {
      * Makes DELETE request
      * @param {String} host - Host URL
      * @param {Object} data - Data to be sent (Optional)
+     * @param {Object} headers - Headers to be set (Optional)
      * @returns {Promise}
      */
     static delete(host, data, headers) {

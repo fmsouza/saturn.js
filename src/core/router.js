@@ -14,6 +14,13 @@ const Cache = Common.Cache;
 
 let logger = LoggerFactory.getServerLogger();
 
+/**
+ * Checks if the signed in user has the expected permissions.
+ * @param {string} token - User authorization token
+ * @param {Array} authorizedRoles - List of roles authorized to access the subsection
+ * @param {string} private_key - Private key used to decrypt the token
+ * @return {boolean}
+ */
 function canAccess(token, authorizedRoles, private_key) {
     if(token!==undefined) {
         const data = Security.decryptAccessToken(token, private_key);
@@ -24,6 +31,15 @@ function canAccess(token, authorizedRoles, private_key) {
     return false;
 }
 
+/**
+ * Checks the configuration object to decide if the request is allowed or not.
+ * @param {string} route - HTTP requested route
+ * @param {Object} request - HTTP Request data object
+ * @param {Object} response - HTTP Response data object
+ * @param {GenericResource} resource - GenericResource object
+ * @param {Object} config - HTTP API configuration object
+ * @return {void}
+ */
 function* readFromConfig(route, request, response, resource, config) {
     const accessPolicy = config['access-policy'];
     const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${route}`);
@@ -48,6 +64,14 @@ function* readFromConfig(route, request, response, resource, config) {
     } else response.status(404).send(`Route '/${route}' does not exist.`);
 }
 
+/**
+ * Checks the accessed route to decide whether it will redirect to user section API or else.
+ * @param {Object} request - HTTP Request data object
+ * @param {Object} response - HTTP Response data object
+ * @param {GenericResource} resource - GenericResource object
+ * @param {Object} config - HTTP API configuration object
+ * @return {void}
+ */
 function *forwardRoute(request, response, resource, config) {
     let tmp = new UserResource(config);
     let route = request.url.split('/')[1];
@@ -93,7 +117,6 @@ class Router {
             next();
         });
         
-        //const accessPolicy = this.config['access-policy'];
         const resource = new GenericResource();
         this.driver.use(wrapper(function*(request, response, next) {
             yield forwardRoute(request, response, resource, config);

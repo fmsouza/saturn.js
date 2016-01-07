@@ -13,13 +13,18 @@ const Process = process;
 global.Log = logger;
 let configContent;
 
+// check if the path to the config file was given
 if(process.argv.length<3) {
     logger.error('You must provide a config file to start the server.');
+    Process.exit(1);
 }
+
+// Reads the given config file or stops the application if it does not exist.
 try {
     configContent = (new File(Process.argv[2])).read();
 } catch(e) {
     logger.error('The provided config file does not exist.');
+    Process.exit(1);
 }
 
 spawn(function* main(){
