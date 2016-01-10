@@ -49,6 +49,16 @@ class Http {
     }
 
     /**
+     * Makes POST request
+     * @param {string} host - Host URL
+     * @param {Object} data - Data to be sent
+     * @returns {Promise}
+     */
+    static postForm(host, data) {
+        return request.post({ url: host, formData: data });
+    }
+
+    /**
      * Makes PUT request
      * @param {string} host - Host URL
      * @param {Object} data - Data to be sent
