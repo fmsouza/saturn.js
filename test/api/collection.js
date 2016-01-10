@@ -158,7 +158,7 @@ describe('API HTTP Collection', () => {
 	});
     
     it('should save documents to the collection \'validating\' by doing a POST request respecting the validation requirements', function*() {
-        let data, obj = { textField: "foo", numberField: 100, dateField: new Date(), booleanField: true };
+        let data, obj = { textField: 'foo', numberField: 100, dateField: new Date(), booleanField: true };
 		try {
 			var output = yield Http.post(`${host}/validating`, obj);
 			data = output;
@@ -179,7 +179,7 @@ describe('API HTTP Collection', () => {
     });
     
     it('should fail to save documents to the collection \'validating\' by doing a POST request disrespecting the validation requirements', function*() {
-        let data, obj = { textField: "foo", numberField: 'wrong value', dateField: new Date(), booleanField: true };
+        let data, obj = { textField: 'foo', numberField: 'wrong value', dateField: new Date(), booleanField: true };
 		try {
 			var output = yield Http.post(`${host}/validating`, obj);
 			data = output;
@@ -191,14 +191,13 @@ describe('API HTTP Collection', () => {
     });
     
     it('should fail to save documents to the collection \'validating\' by doing a POST request missing a required field', function*() {
-        let data, obj = { textField: "foo", numberField: 100 };
+        let data, obj = { textField: 'foo', numberField: 100 };
 		try {
 			var output = yield Http.post(`${host}/validating`, obj);
 			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-            console.log(data.toString());
 			Assert.equal(data.statusCode, 500);
 		}
     });
