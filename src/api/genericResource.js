@@ -56,7 +56,13 @@ class GenericResource {
 	*POST(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
-        let body = request.body;
+        let body = request.body || {};
+        if(request.hasOwnProperty('files')) {
+            let files = request.files || [];
+            for (let index in files) {
+                body[files[index].fieldname] = files[index];
+            }
+        }
         
 		try {
             if(policy.hasOwnProperty('fields')) {
@@ -81,7 +87,13 @@ class GenericResource {
 	*PUT(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
-		const body = request.body;
+        let body = request.body || {};
+        if(request.hasOwnProperty('files')) {
+            let files = request.files || [];
+            for (let index in files) {
+                body[files[index].fieldname] = files[index];
+            }
+        }
         
 		let obj = yield Collection.findById(body._id);
 		for (let key of Object.keys(body)) obj.set(key, body[key]);

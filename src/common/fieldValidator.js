@@ -33,13 +33,24 @@ class FieldValidator {
      * @throw {Error}
      */
     parseType(type, value, field) {
-        if(type==='string') return this.checkType(type, field, () => {
+        if(typeof type==='object' && type.length!==undefined) return this.checkType(type, field, () => {
+            if(type.indexOf(value.mimetype)>-1) {
+                let ext = value.originalname.split('.');
+                return `${value.path}.${ext[ext.length-1]}`;
+            }
+            else throw new Error('');
+        });
+        else if(type==='string') return this.checkType(type, field, () => {
             return value.toString();
         });
         else if(type==='date') return this.checkType(type, field, () => {
             let tmp = new Date(value);
             if(tmp instanceof Date) return tmp;
             else throw new Error('');
+        });
+        else if(type instanceof Array) return this.checkType(type, field, () => {
+            console.log(value);
+            throw new Error('');
         });
         else return this.checkType(type, field, () => {
             let tmp = JSON.parse(value);
@@ -56,16 +67,17 @@ class FieldValidator {
      */
     validate(data) {
         let output = {};
-        for(let rule of Object.keys(this.rules)) {
+        Object.keys(this.rules).forEach( (rule) => {
             let tmp = this.rules[rule];
             try {
-                if(data.hasOwnProperty(rule)) output[rule] = this.parseType(tmp.type, data[rule], rule);
+                if(data[rule]!==undefined) output[rule] = this.parseType(tmp.type, data[rule], rule);
                 else if(tmp.required) throw new Error(`The field '${rule}' is required.`);
             } catch(e) {
-                if(e.message==='') throw new Error(`The type of the field '${rule}' content must be '${tmp.type}'.`);
+                let type = (typeof tmp.type==='object' && tmp.type.length!==undefined)? tmp.type.join(', ') : tmp.toString();
+                if(e.message==='') throw new Error(`The type of the field '${rule}' content must be '${type}'.`);
                 else throw e;
             }
-        }
+        });
         return output;
     }
 }

@@ -4,7 +4,7 @@
   "description": "HTTP/PubSub dynamic Web Server",
   "main": "src/app.js",
   "scripts": {
-    "test": "mocha test/ test/**/*",
+    "test": "mocha test/ test/**",
     "start": "node src/app.js",
     "install": "npm install -g mocha-co"
   },
@@ -42,6 +42,7 @@
     "helmet": "^0.14.0",
     "mongodb": "^1.4.4",
     "mongorito": "^1.4.3",
+    "multer": "^1.1.0",
     "request-promise": "^1.0.2"
   },
   "devDependencies": {

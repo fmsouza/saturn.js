@@ -1,4 +1,6 @@
 'use strict';
+
+const multer = require('multer');
 const LoggerFactory = require('./log/loggerFactory');
 const Config  = require('../config');
 const ServerDriver = require('express');
@@ -108,6 +110,7 @@ class Router {
         this.driver.use(helmet());
         this.driver.use(BodyParser.urlencoded({extended: true}));
         this.driver.use(BodyParser.json());
+        this.driver.use(multer({ dest: config['files-path'] || '/tmp' }).any());
         this.driver.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
