@@ -61,15 +61,16 @@ describe('API HTTP Collection', () => {
 	});
 	
 	it('should get the documents which match to the given query on the collection \'tests\' by doing a GET request to \'/tests\' with the data to query in the body', function*() {
-		let data;
+		let data, obj = { _id: savedObj._id, foo: savedObj.foo };
 		try {
-			var output = yield Http.get(`${host}/tests`, savedObj);
+			var output = yield Http.get(`${host}/tests`, obj);
 			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
 			Assert.equal(data.statusCode, 200);
-			Assert.equal(data.body instanceof Object, true);
+            Assert.equal(data.body instanceof Array, true);
+            Assert.equal(data.body.length, 1);
 			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});

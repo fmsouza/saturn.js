@@ -62,16 +62,17 @@ class FieldValidator {
     /**
      * Validates the input data
      * @param {Object} data - Input data
+     * @param {boolean} checkRequired - Check wether the field is required or not
      * @return {Object}
      * @throw {Error}
      */
-    validate(data) {
+    validate(data, checkRequired) {
         let output = {};
         Object.keys(this.rules).forEach( (rule) => {
             let tmp = this.rules[rule];
             try {
                 if(data[rule]!==undefined) output[rule] = this.parseType(tmp.type, data[rule], rule);
-                else if(tmp.required) throw new Error(`The field '${rule}' is required.`);
+                else if(tmp.required && checkRequired) throw new Error(`The field '${rule}' is required.`);
             } catch(e) {
                 let type = (typeof tmp.type==='object' && tmp.type.length!==undefined)? tmp.type.join(', ') : tmp.toString();
                 if(e.message==='') throw new Error(`The type of the field '${rule}' content must be '${type}'.`);

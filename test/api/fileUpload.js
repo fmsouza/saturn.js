@@ -13,7 +13,7 @@ const Router    = Core.Router;
 const File      = Core.File;
 const fs        = require('fs');
 
-let router, serverConfig, host, server;
+let router, serverConfig, host, server, savedObj;
 
 describe('API HTTP Collection with file upload', () => {
 	
@@ -36,8 +36,38 @@ describe('API HTTP Collection with file upload', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.fileField.split('.')[1], 'json');
+            let splitted = data.fileField.split('.');
+			Assert.equal(splitted[splitted.length-1], 'json');
 			Assert.notEqual(data._id, undefined);
+            savedObj = data;
+		}
+    });
+    
+    it('should fail to upload a file to the server by doing a POST request to \'/uploading\' with an unsupported file', function*() {
+        let data, obj = { 'fileField': fs.createReadStream(`${__dirname}/fileUpload.js`) };
+		try {
+			data = yield Http.postForm(`${host}/uploading`, obj);
+            data = JSON.parse(data);
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 500);
+		}
+    });
+    
+    it('should manage to retrieve an uploaded file from the server by doing a GET request to \'/uploading\'', function*() {
+        let data, obj = { '_id': savedObj._id };
+		try {
+			data = yield Http.get(`${host}/uploading`, obj);
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200);
+            Assert.equal(data.body instanceof Array, true);
+			Assert.equal(data.body.length, 1);
+            Assert.equal(data.body[0] instanceof Object, true);
+			Assert.equal(data.body[0].fileField, savedObj.fileField);
+			Assert.equal(data.body[0]._id, savedObj._id);
 		}
     });
 	

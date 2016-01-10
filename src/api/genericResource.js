@@ -5,17 +5,11 @@ const Collection = require('../collectionModel');
 const Database = Core.Database;
 const FieldValidator = Common.FieldValidator;
 
-let accessPolicy;
-
 /**
  * GenericResource class is responsible for handling all CRUD operations, data validation and interaction with the repository.
  * @class {GenericResource}
  */
 class GenericResource {
-    
-    constructor(config) {
-        accessPolicy = config['access-policy'];
-    }
 
     /**
      * Retrieves information from the repository
@@ -26,19 +20,26 @@ class GenericResource {
 	*GET(request, response, policy) {
         const params = request.url.split('/');
 		Collection.prototype.collection = params[1];
-		const body = request.body || {};
+		const body = request.body;
+        if(policy.hasOwnProperty('fields')) {
+            const validator = new FieldValidator(policy.fields);
+            body.data = validator.validate(body, false);
+        }
         
-		let query = Collection.where(body.data);
+        let query = Collection;
+		if(body.sort) {
+			let sort = Object.keys(body.sort)[0];
+			query = query.sort(sort, body.sort[sort]);
+            delete body.sort;
+		}
+        query = query.where(body);
+		//let query = Collection.where(body.data);
         if(params.length===5 && params[2]==='page' && !isNaN(params[3]) && !isNaN(params[4])) {
             let docs = parseInt(params[3]);
             let skipped = docs*(parseInt(params[4])-1);
             query = query.skip(skipped).limit(docs);
         }
         
-		if(body.sort) {
-			let sort = Object.keys(body.sort)[0];
-			query = query.sort(sort, body.sort[sort]);
-		}
 		try {
 			let data = yield query.find();
 			response.status(200).jsonp(data);
@@ -67,7 +68,7 @@ class GenericResource {
 		try {
             if(policy.hasOwnProperty('fields')) {
                 const validator = new FieldValidator(policy.fields);
-                body = validator.validate(body);
+                body = validator.validate(body, true);
             }
             
 			let obj = new Collection(body);

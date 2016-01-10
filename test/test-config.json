@@ -45,6 +45,7 @@
             }
         },
         "/uploading": {
+            "GET":    { "public": true },
             "POST":    {
                 "public": true,
                 "fields": {
