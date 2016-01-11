@@ -38,7 +38,7 @@
     "compression": "^1.5.2",
     "crypto-js": "^3.1.6",
     "express": "^4.13.3",
-    "fs-extra": "^0.26.0",
+    "fs-extra": "^0.26.4",
     "helmet": "^0.14.0",
     "mongodb": "^1.4.4",
     "mongorito": "^1.4.3",
