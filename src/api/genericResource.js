@@ -33,7 +33,6 @@ class GenericResource {
             delete body.sort;
 		}
         query = query.where(body);
-		//let query = Collection.where(body.data);
         if(params.length===5 && params[2]==='page' && !isNaN(params[3]) && !isNaN(params[4])) {
             let docs = parseInt(params[3]);
             let skipped = docs*(parseInt(params[4])-1);
