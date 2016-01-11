@@ -14,7 +14,10 @@
 		"pass": ""
 	},
 	"methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "files-path": "./uploads/",
+    "file-upload": {
+        "path": "uploads/",
+        "route": "/static"
+    },
     "users": {
         "collection": "users",
         "default-role": "user",

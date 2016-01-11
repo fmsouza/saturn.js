@@ -11,6 +11,7 @@ const helmet = require('helmet');
 const GenericResource = require('../api/genericResource');
 const UserResource = require('../api/userResource');
 const Common = require('../common');
+const path = require('path');
 const Security = Common.Security;
 const Cache = Common.Cache;
 
@@ -44,10 +45,10 @@ function canAccess(token, authorizedRoles, private_key) {
  */
 function* readFromConfig(route, request, response, resource, config) {
     const accessPolicy = config['access-policy'];
-    const policyAllowsRoute = accessPolicy.hasOwnProperty(`/${route}`);
-    logger.info(`Policy allows requests to '/${route}': ${policyAllowsRoute}`);
+    const policyAllowsRoute = accessPolicy.hasOwnProperty(route);
+    logger.info(`Policy allows requests to '${route}': ${policyAllowsRoute}`);
     if(policyAllowsRoute) {
-        let access = accessPolicy[`/${route}`];
+        let access = accessPolicy[route];
         const policyAllowsMethod = Object.keys(access).indexOf(request.method)>-1;
         logger.info(`Access Policy allows method '${request.method}': ${policyAllowsMethod}`);
         if(policyAllowsMethod) {
@@ -61,9 +62,9 @@ function* readFromConfig(route, request, response, resource, config) {
                 yield resource[request.method](request, response, access[request.method]);
             } else if(canAccess(request.headers['authorization'], access[request.method].roles, config['api-configuration']['private-key'])) {
                 yield resource[request.method](request, response, access[request.method]);
-            } else response.status(400).send(`Method ${request.method} is not publicly allowed for '/${route}'.`);
-        } else response.status(400).send(`Method ${request.method} is not allowed for '/${route}'.`);
-    } else response.status(404).send(`Route '/${route}' does not exist.`);
+            } else response.status(400).send(`Method ${request.method} is not publicly allowed for '${route}'.`);
+        } else response.status(400).send(`Method ${request.method} is not allowed for '${route}'.`);
+    } else response.status(404).send(`Route '${route}' does not exist.`);
 }
 
 /**
@@ -76,18 +77,26 @@ function* readFromConfig(route, request, response, resource, config) {
  */
 function *forwardRoute(request, response, resource, config) {
     let tmp = new UserResource(config);
-    let route = request.url.split('/')[1];
+    let route = `/${request.url.split('/')[1]}`;
     let method = request.method;
     switch(route) {
-        case 'signup':
+        case config['file-upload']['route']:
+            let filePath = request.url.replace(config['file-upload']['route'], config['file-upload']['path']);
+            console.log(filePath);
+            filePath = path.resolve(`${Config.root}/../${filePath}`);
+            console.log('filePath:', filePath);
+            if(method==='GET') response.sendFile(filePath);
+            else response.status(400).send(`Method ${request.method} is not allowed for '/signup'.`);
+            break;
+        case '/signup':
             if(method==='POST') yield tmp.signup(request, response);
             else response.status(400).send(`Method ${request.method} is not allowed for '/signup'.`);
             break;
-        case 'signin':
+        case '/signin':
             if(method==='POST') yield tmp.signin(request, response);
             else response.status(400).send(`Method ${request.method} is not allowed for '/signin'.`);
             break;
-        case 'signoff':
+        case '/signoff':
             if(method==='POST') yield tmp.signoff(request, response);
             else response.status(400).send(`Method ${request.method} is not allowed for '/signoff'.`);
             break;
@@ -110,7 +119,8 @@ class Router {
         this.driver.use(helmet());
         this.driver.use(BodyParser.urlencoded({extended: true}));
         this.driver.use(BodyParser.json());
-        this.driver.use(multer({ dest: config['files-path'] || '/tmp' }).any());
+        let uploadPath = (config['file-upload']['path'])? path.resolve(`${Config.root}/../${config['file-upload']['path']}`) : '/tmp';
+        this.driver.use(multer({ dest: uploadPath }).any());
         this.driver.use((req, res, next) => {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');

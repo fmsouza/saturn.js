@@ -1,5 +1,9 @@
 'use strict';
 
+const Config = require('../config');
+const Core = require('../core');
+const File = Core.File;
+const fs = require('fs-extra');
 /**
  * FieldValidator class is responsible for validating the inputted data in the API requests
  * before doing the communication with the database
@@ -36,9 +40,17 @@ class FieldValidator {
         if(typeof type==='object' && type.length!==undefined) return this.checkType(type, field, () => {
             if(type.indexOf(value.mimetype)>-1) {
                 let ext = value.originalname.split('.');
-                return `${value.path}.${ext[ext.length-1]}`;
+                let newName = `${value.path}.${ext[ext.length-1]}`;
+                fs.copySync(value.path, newName);
+                fs.removeSync(value.path);
+                let splittedPath = newName.split('/');
+                return splittedPath[splittedPath.length-1];
             }
-            else throw new Error('');
+            else {
+                let file = new File(value.path);
+                file.remove();
+                throw new Error('');
+            }
         });
         else if(type==='string') return this.checkType(type, field, () => {
             return value.toString();
