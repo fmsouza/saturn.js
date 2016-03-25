@@ -63,7 +63,7 @@ describe('API HTTP Collection', () => {
 	it('should get the documents which match to the given query on the collection \'tests\' by doing a GET request to \'/tests\' with the data to query in the body', function*() {
 		let data, obj = { _id: savedObj._id, foo: savedObj.foo };
 		try {
-			var output = yield Http.get(`${host}/tests`, obj);
+			var output = yield Http.get(`${host}/tests?query=${JSON.stringify(obj)}`);
 			data = output;
 		} catch(e) {
 			data = e;
@@ -107,9 +107,9 @@ describe('API HTTP Collection', () => {
 	
 	it('should get a list with all documents on the collection \'tests\', ordered by the field \'foo\', by doing a GET request to \'/tests\'', function*() {
 		let data;
-		const body = { sort: { foo: 1 } }
+		const body = { foo: 1 };
 		try {
-			var output = yield Http.get(`${host}/tests`, body);
+			var output = yield Http.get(`${host}/tests?sort=${JSON.stringify(body)}`);
 			data = output;
 		} catch(e) {
 			data = e;
@@ -124,7 +124,7 @@ describe('API HTTP Collection', () => {
 	it('should delete a document in the collection \'tests\' by doing a DELETE request to \'/tests\' with the data to query for the document in the body', function*() {
 		let data;
 		try {
-			var output = yield Http.delete(`${host}/tests`, savedObj);
+			var output = yield Http.delete(`${host}/tests?query=${JSON.stringify(savedObj)}`);
 			data = output.statusCode;
 		} catch(e) {
 			data = e.statusCode;
@@ -136,7 +136,7 @@ describe('API HTTP Collection', () => {
 	it('should fail get the documents on the collection \'foo\' by doing a GET request because \'/foo\' the method is not publicly allowed', function*() {
 		let data;
 		try {
-			var output = yield Http.get(`${host}/foo`, savedObj);
+			var output = yield Http.get(`${host}/foo?query=${JSON.stringify(savedObj)}`);
 			data = output.statusCode;
 		} catch(e) {
 			data = e.statusCode;

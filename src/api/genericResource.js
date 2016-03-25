@@ -4,6 +4,7 @@ const Common = require('../common');
 const Collection = require('../collectionModel');
 const Database = Core.Database;
 const FieldValidator = Common.FieldValidator;
+const URL = require('url');
 
 /**
  * GenericResource class is responsible for handling all CRUD operations, data validation and interaction with the repository.
@@ -18,21 +19,26 @@ class GenericResource {
      * @return {void}
      */
 	*GET(request, response, policy) {
-        const params = request.url.split('/');
+        let url = URL.parse(request.url, true);
+        const params = url.pathname.split('/');
 		Collection.prototype.collection = params[1];
-		const body = request.body;
+		const body = url.query;
+        
+        if(body.query) body.query = JSON.parse(body.query);
+        
         if(policy.hasOwnProperty('fields')) {
             const validator = new FieldValidator(policy.fields);
-            body.data = validator.validate(body, false);
+            body.query = validator.validate(body.query, false);
         }
         
         let query = Collection;
 		if(body.sort) {
+            body.sort = JSON.parse(body.sort);
 			let sort = Object.keys(body.sort)[0];
 			query = query.sort(sort, body.sort[sort]);
             delete body.sort;
 		}
-        query = query.where(body);
+        query = query.where(body.query);
         if(params.length===5 && params[2]==='page' && !isNaN(params[3]) && !isNaN(params[4])) {
             let docs = parseInt(params[3]);
             let skipped = docs*(parseInt(params[4])-1);
@@ -112,12 +118,14 @@ class GenericResource {
      * @return {void}
      */
 	*DELETE(request, response, policy) {
-        const params = request.url.split('/');
+        let url = URL.parse(request.url, true);
+        const params = url.pathname.split('/');
 		Collection.prototype.collection = params[1];
-		const body = request.body;
+		const body = url.query;
+        if(body.query) body.query = JSON.parse(body.query);
         
 		try {
-			let obj = yield Collection.findOne(body);
+			let obj = yield Collection.findOne(body.query);
             yield Collection.remove(obj);
 			response.status(200).send('success');
 		} catch (e) {

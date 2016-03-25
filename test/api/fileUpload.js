@@ -58,7 +58,7 @@ describe('API HTTP Collection with file upload', () => {
     it('should manage to retrieve an document with an uploaded file from the server by doing a GET request to \'/uploading\'', function*() {
         let data, obj = { '_id': savedObj._id };
 		try {
-			data = yield Http.get(`${host}/uploading`, obj);
+			data = yield Http.get(`${host}/uploading?query=${JSON.stringify(obj)}`);
 		} catch(e) {
 			data = e;
 		} finally {

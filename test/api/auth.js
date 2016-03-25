@@ -63,7 +63,7 @@ describe('Authentication API', () => {
     it('should allow the user to access the private API using the authorization key', function*() {
         let data;
 		try {
-			var output = yield Http.get(`${host}/foo`, {}, { 'Authorization': token });
+			var output = yield Http.get(`${host}/foo`, { 'Authorization': token });
 			data = output;
 		} catch(e) {
 			data = e;
@@ -76,7 +76,7 @@ describe('Authentication API', () => {
     it('should not allow the user to access the private API using the authorization key when having no required roles', function*() {
         let data;
 		try {
-			var output = yield Http.get(`${host}/users`, {}, { 'Authorization': token });
+			var output = yield Http.get(`${host}/users`, { 'Authorization': token });
 			data = output;
 		} catch(e) {
 			data = e;

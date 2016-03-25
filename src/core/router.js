@@ -78,6 +78,7 @@ function* readFromConfig(route, request, response, resource, config) {
 function *forwardRoute(request, response, resource, config) {
     let tmp = new UserResource(config);
     let route = `/${request.url.split('/')[1]}`;
+    if(route.indexOf('?')>-1) route = route.split('?')[0];
     let method = request.method;
     switch(route) {
         case config['file-upload']['route']:
