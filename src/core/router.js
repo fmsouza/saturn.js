@@ -83,9 +83,7 @@ function *forwardRoute(request, response, resource, config) {
     switch(route) {
         case config['file-upload']['route']:
             let filePath = request.url.replace(config['file-upload']['route'], config['file-upload']['path']);
-            console.log(filePath);
             filePath = path.resolve(`${Config.root}/../${filePath}`);
-            console.log('filePath:', filePath);
             if(method==='GET') response.sendFile(filePath);
             else response.status(400).send(`Method ${request.method} is not allowed for '/signup'.`);
             break;
