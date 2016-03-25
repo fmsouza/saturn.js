@@ -46,6 +46,21 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
+	it('should insert a new document in the collection \'tests\' by sending a form in a POST request to \'/tests\' with the data', function*() {
+		let obj = { foo: 'foobar' };
+		let data;
+		try {
+			var output = yield Http.postForm(`${host}/tests`, obj);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(typeof data, 'string');
+            data = JSON.parse(data);
+			Assert.equal(data.foo, obj.foo);
+		}
+	});
+	
 	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		obj.bar = 'foo';
@@ -85,7 +100,7 @@ describe('API HTTP Collection', () => {
 		} finally {
 			Assert.equal(data.statusCode, 200);
 			Assert.equal(data.body instanceof Array, true);
-			Assert.equal(data.body.length, 1);
+			Assert.equal(data.body.length, 2);
 			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});
@@ -100,7 +115,7 @@ describe('API HTTP Collection', () => {
 		} finally {
 			Assert.equal(data.statusCode, 200);
 			Assert.equal(data.body instanceof Array, true);
-			Assert.equal(data.body.length, 1);
+			Assert.equal(data.body.length, 2);
 			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});
@@ -116,7 +131,7 @@ describe('API HTTP Collection', () => {
 		} finally {
 			Assert.equal(data.statusCode, 200);
 			Assert.equal(data.body instanceof Array, true);
-			Assert.equal(data.body.length, 1);
+			Assert.equal(data.body.length, 2);
 			Assert.equal(data.body[0].foo, 'bar');
 		}
 	});
