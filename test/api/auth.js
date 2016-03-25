@@ -45,6 +45,21 @@ describe('Authentication API', () => {
 		}
 	});
 	
+	it('should create another user', function*() {
+		let user = { email: email+'222', password: '123456' };
+		let data;
+		try {
+			var output = yield Http.postForm(`${host}/signup`, user);
+			data = JSON.parse(output);
+		} catch(e) {
+			data = e;
+		} finally {
+            Assert.equal(data instanceof Error, false);
+            Assert.equal(data.email, email+'222');
+            Assert.equal(data.roles[0], 'user');
+		}
+	});
+	
 	it('should login with the created used data', function*() {
 		let user = { email: email, password: '123456' };
 		let data;

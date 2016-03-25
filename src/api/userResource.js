@@ -29,7 +29,7 @@ class UserResource {
      */
 	*signup(request, response) {
 		try {
-            let body = request.body;
+            let body = JSON.parse(JSON.stringify(request.body));
             if(!body.hasOwnProperty('email') || !body.hasOwnProperty('password')) throw new Error('You must inform the user email and password');
             body.password = Security.md5(body.password).toString();
             if(!body.hasOwnProperty('roles')) body.roles = [userConfig['default-role']];
