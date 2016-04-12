@@ -101,11 +101,12 @@ class GenericResource {
             }
         }
         
-		let obj = yield Collection.findById(body._id);
-		for (let key of Object.keys(body)) obj.set(key, body[key]);
 		try {
-			yield obj.save();
-			response.status(200).send('success');
+		    let obj = yield Collection.findById(body._id);
+		    for (let key of Object.keys(body)) {
+                obj.set(key, body[key]);
+            }
+			response.status(200).send(yield obj.save());
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
 		}

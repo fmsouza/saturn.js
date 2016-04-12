@@ -61,17 +61,34 @@ describe('API HTTP Collection', () => {
 		}
 	});
 	
-	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body', function*() {
+	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body and the updated value to an existing field', function*() {
+		let obj = JSON.parse(JSON.stringify(savedObj));
+		obj.foo = 'bubble';
+		let data;
+		try {
+			var output = yield Http.put(`${host}/tests`, obj);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200, 'statusCode is '+data.statusCode);
+			Assert.equal(data.body.foo, obj.foo, 'data was not updated');
+		}
+	});
+	
+	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body and the updated value to an unexisting field', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		obj.bar = 'foo';
 		let data;
 		try {
 			var output = yield Http.put(`${host}/tests`, obj);
-			data = output.statusCode;
+			data = output;
 		} catch(e) {
-			data = e.statusCode;
+			data = e;
 		} finally {
-			Assert.equal(data, 200);
+			Assert.equal(data.statusCode, 200, 'statusCode is '+data.statusCode);
+			Assert.equal(data.body.foo, obj.foo, 'foo field is different');
+			Assert.equal(data.body.bar, obj.bar, 'bar field is differente');
 		}
 	});
 	
