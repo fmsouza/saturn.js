@@ -1,5 +1,5 @@
 'use strict';
-const Driver = require('mongorito');
+const Driver = require('robe');
 const Config = require('../config');
 	
 function connect(config) {
@@ -10,6 +10,5 @@ function connect(config) {
 }
 
 module.exports = {
-	connect: connect,
-	Model: Driver.Model
+	connect: connect
 };

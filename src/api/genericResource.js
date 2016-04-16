@@ -1,10 +1,13 @@
 'use strict';
+/* global db; */
 const Core = require('../core');
 const Common = require('../common');
-const Collection = require('../collectionModel');
 const Database = Core.Database;
 const FieldValidator = Common.FieldValidator;
+const LoggerFactory = require('../core/log/loggerFactory');
 const URL = require('url');
+
+const logger = LoggerFactory.getRuntimeLogger();
 
 /**
  * GenericResource class is responsible for handling all CRUD operations, data validation and interaction with the repository.
@@ -21,34 +24,34 @@ class GenericResource {
 	*GET(request, response, policy) {
         let url = URL.parse(request.url, true);
         const params = url.pathname.split('/');
-		Collection.prototype.collection = params[1];
+        let collection = db.collection(params[1]);
 		const body = url.query;
+        let options = {};
         
         if(body.query) body.query = JSON.parse(body.query);
+        else body.query = {};
         
         if(policy.hasOwnProperty('fields')) {
             const validator = new FieldValidator(policy.fields);
             body.query = validator.validate(body.query, false);
         }
         
-        let query = Collection;
 		if(body.sort) {
             body.sort = JSON.parse(body.sort);
-			let sort = Object.keys(body.sort)[0];
-			query = query.sort(sort, body.sort[sort]);
-            delete body.sort;
+            options.sort = body.sort;
 		}
-        query = query.where(body.query);
         if(params.length===5 && params[2]==='page' && !isNaN(params[3]) && !isNaN(params[4])) {
             let docs = parseInt(params[3]);
             let skipped = docs*(parseInt(params[4])-1);
-            query = query.skip(skipped).limit(docs);
+            options.limit = docs;
+            options.skip = skipped;
         }
         
 		try {
-			let data = yield query.find();
+            let data = (Object.keys(options).length>0)? yield collection.find(body.query, options) : yield collection.find(body.query);
 			response.status(200).jsonp(data);
 		} catch (e) {
+            logger.error(e.stack);
 			response.status(500).jsonp(e.toString());
 		}
 	}
@@ -61,7 +64,7 @@ class GenericResource {
      */
 	*POST(request, response, policy) {
         const params = request.url.split('/');
-		Collection.prototype.collection = params[1];
+        let collection = db.collection(params[1]);
         let body = request.body || {};
         if(request.hasOwnProperty('files')) {
             let files = request.files || [];
@@ -75,12 +78,13 @@ class GenericResource {
                 const validator = new FieldValidator(policy.fields);
                 body = validator.validate(body, true);
             }
-            
-			let obj = new Collection(body);
-			yield obj.save();
-			response.status(200).jsonp(obj);
+            yield collection.insert(body);
+			response.status(200).jsonp(body);
 		} catch (e) {
-			response.status(500).jsonp(e.toString());
+            if(!body._id) {
+                logger.error(e.stack);
+                response.status(500).jsonp(e.toString());
+            } else response.status(200).jsonp(body);
 		}
 	}
 
@@ -92,7 +96,7 @@ class GenericResource {
      */
 	*PUT(request, response, policy) {
         const params = request.url.split('/');
-		Collection.prototype.collection = params[1];
+        let collection = db.collection(params[1]);
         let body = request.body || {};
         if(request.hasOwnProperty('files')) {
             let files = request.files || [];
@@ -102,12 +106,12 @@ class GenericResource {
         }
         
 		try {
-		    let obj = yield Collection.findById(body._id);
-		    for (let key of Object.keys(body)) {
-                obj.set(key, body[key]);
-            }
-			response.status(200).send(yield obj.save());
+            let query = { _id: body._id };
+            delete body._id;
+            yield collection.update(query, body);
+			response.status(200).send('success');
 		} catch (e) {
+            logger.error(e.stack);
 			response.status(500).jsonp(e.toString());
 		}
 	}
@@ -121,15 +125,15 @@ class GenericResource {
 	*DELETE(request, response, policy) {
         let url = URL.parse(request.url, true);
         const params = url.pathname.split('/');
-		Collection.prototype.collection = params[1];
+        let collection = db.collection(params[1]);
 		const body = url.query;
         if(body.query) body.query = JSON.parse(body.query);
         
 		try {
-			let obj = yield Collection.findOne(body.query);
-            yield Collection.remove(obj);
+            let obj = collection.remove(body.query);
 			response.status(200).send('success');
 		} catch (e) {
+            logger.error(e.stack);
 			response.status(500).jsonp(e.toString());
 		}
 	}

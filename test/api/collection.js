@@ -25,7 +25,7 @@ describe('API HTTP Collection', () => {
 		const dbConfig = config['db-configuration'];
 		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
-		yield Database.connect(dbConfig);
+		global.db = yield Database.connect(dbConfig);
 		let router = new Router(config);
 		server = router.start(serverConfig.host, serverConfig.port);
 	});
@@ -39,7 +39,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
 			Assert.equal(data.body instanceof Object, true);
 			Assert.equal(data.body.foo, obj.foo);
 			savedObj = data.body;
@@ -47,48 +47,53 @@ describe('API HTTP Collection', () => {
 	});
 	
 	it('should insert a new document in the collection \'tests\' by sending a form in a POST request to \'/tests\' with the data', function*() {
-		let obj = { foo: 'foobar' };
+		let obj = { foo: 'barfoo' };
 		let data;
 		try {
 			var output = yield Http.postForm(`${host}/tests`, obj);
-			data = output;
+			data = JSON.parse(output);
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(typeof data, 'string');
-            data = JSON.parse(data);
-			Assert.equal(data.foo, obj.foo);
+			Assert.equal(data.foo, obj.foo, data.toString());
 		}
 	});
 	
 	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body and the updated value to an existing field', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		obj.foo = 'bubble';
-		let data;
+		let data, check;
 		try {
 			var output = yield Http.put(`${host}/tests`, obj);
+			check = yield Http.get(`${host}/tests?query=${JSON.stringify(obj)}`);
 			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200, 'statusCode is '+data.statusCode);
-			Assert.equal(data.body.foo, obj.foo, 'data was not updated');
+			Assert.equal(data.statusCode, 200, data.toString());
+			Assert.equal(data.body, 'success');
+			Assert.equal(check.statusCode, 200, data.toString());
+			Assert.equal(check.body.length, 1);
+			Assert.equal(check.body[0].foo, obj.foo);
 		}
 	});
 	
 	it('should update a document in the collection \'tests\' by doing a PUT request to \'/tests\' with the data including the \'_id\' in the body and the updated value to an unexisting field', function*() {
 		let obj = JSON.parse(JSON.stringify(savedObj));
 		obj.bar = 'foo';
-		let data;
+		let data, check;
 		try {
 			var output = yield Http.put(`${host}/tests`, obj);
+			check = yield Http.get(`${host}/tests?query=${JSON.stringify(obj)}`);
 			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200, 'statusCode is '+data.statusCode);
-			Assert.equal(data.body.foo, obj.foo, 'foo field is different');
-			Assert.equal(data.body.bar, obj.bar, 'bar field is differente');
+			Assert.equal(data.statusCode, 200, data.toString());
+			Assert.equal(data.body, 'success');
+			Assert.equal(check.statusCode, 200, data.toString());
+			Assert.equal(check.body.length, 1);
+			Assert.equal(check.body[0].bar, obj.bar);
 		}
 	});
 	
@@ -100,7 +105,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
             Assert.equal(data.body instanceof Array, true);
             Assert.equal(data.body.length, 1);
 			Assert.equal(data.body[0].foo, 'bar');
@@ -115,7 +120,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
 			Assert.equal(data.body instanceof Array, true);
 			Assert.equal(data.body.length, 2);
 			Assert.equal(data.body[0].foo, 'bar');
@@ -130,7 +135,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
 			Assert.equal(data.body instanceof Array, true);
 			Assert.equal(data.body.length, 2);
 			Assert.equal(data.body[0].foo, 'bar');
@@ -146,7 +151,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
 			Assert.equal(data.body instanceof Array, true);
 			Assert.equal(data.body.length, 2);
 			Assert.equal(data.body[0].foo, 'bar');
@@ -161,7 +166,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e.statusCode;
 		} finally {
-			Assert.equal(data, 200);
+			Assert.equal(data, 200, data.toString());
 		}
 	});
 	
@@ -173,7 +178,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e.statusCode;
 		} finally {
-			Assert.equal(data, 400);
+			Assert.equal(data, 400, data.toString());
 		}
 	});
 	
@@ -186,7 +191,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e.statusCode;
 		} finally {
-			Assert.equal(data, 400);
+			Assert.equal(data, 400, data.toString());
 		}
 	});
     
@@ -198,7 +203,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
             Assert.equal(data.body instanceof Object, true);
             Assert.deepEqual(data.body.textField, obj.textField);
             Assert.equal(typeof data.body.textField, 'string');
@@ -219,7 +224,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 500);
+			Assert.equal(data.statusCode, 500, data.toString());
 		}
     });
     
@@ -231,9 +236,14 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 500);
+			Assert.equal(data.statusCode, 500, data.toString());
 		}
     });
 	
-	after(() => { server.close(); });
+	after(function*() {
+		server.close();
+		yield global.db.collection('tests').remove({});
+		yield global.db.collection('foo').remove({});
+		yield global.db.collection('validating').remove({});
+	});
 });

@@ -15,11 +15,6 @@ const File      = Core.File;
 
 var router;
 
-class Test extends Model {
-	get value() { return this.get('value'); }
-	set value(value) { this.set('value', value); }
-}
-
 describe('API HTTP Collection with Pagination', () => {
 	
 	let server, host;
@@ -30,8 +25,8 @@ describe('API HTTP Collection with Pagination', () => {
 		const dbConfig = config['db-configuration'];
 		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
-		yield Database.connect(dbConfig);
-		for(let i = 0; i<10; i++) yield (new Test({ value: i })).save();
+		global.db = yield Database.connect(dbConfig);
+		for(let i = 0; i<10; i++) yield global.db.collection('tests').insert({ value: i });
         
 		let router = new Router(config);
 		server = router.start(serverConfig.host, serverConfig.port);
@@ -75,6 +70,6 @@ describe('API HTTP Collection with Pagination', () => {
 	
 	after(function*() {
 		server.close();
-		yield Test.remove({});
+		yield global.db.collection('tests').remove({});
 	});
 });

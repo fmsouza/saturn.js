@@ -25,7 +25,7 @@ describe('API HTTP Collection', () => {
 		const dbConfig = config['db-configuration'];
 		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
-		yield Database.connect(dbConfig);
+		global.db = yield Database.connect(dbConfig);
 		let router = new Router(config);
 		server = router.start(serverConfig.host, serverConfig.port);
 	});
@@ -38,7 +38,7 @@ describe('API HTTP Collection', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 200);
+			Assert.equal(data.statusCode, 200, data.toString());
 			Assert.equal(data.body instanceof Object, true);
 			Assert.equal(data.body.length, 0);
 		}

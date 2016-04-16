@@ -31,7 +31,7 @@ spawn(function* main(){
     logger.info('Starting the server...');
     let config = JSON.parse(configContent);
     let dbConfig = config['db-configuration'];
-    yield Database.connect(dbConfig); // Creating connection to database
+    global.db = yield Database.connect(dbConfig); // Creating connection to database
 
     // Configuring the RESTful router to handle HTTP requests
     let router = new Router(config);

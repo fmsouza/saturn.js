@@ -23,7 +23,7 @@ describe('API HTTP Collection with file upload', () => {
 		const dbConfig = config['db-configuration'];
 		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
-		yield Database.connect(dbConfig);
+		global.db = yield Database.connect(dbConfig);
 		let router = new Router(config);
 		server = router.start(serverConfig.host, serverConfig.port);
 	});

@@ -1,12 +1,11 @@
 'use strict';
-/* global Buffer; */
+/* global Buffer, db; */
 const Core = require('../core');
 const Database = Core.Database;
-const Collection = require('../collectionModel');
 const Common = require('../common');
 const Security = Common.Security;
 
-let SECRET_KEY, apiConfig, userConfig;
+let SECRET_KEY, apiConfig, userConfig, collection;
 
 /**
  * UserResource class is responsible for handling the user access control management.
@@ -18,7 +17,7 @@ class UserResource {
         userConfig = config['users'];
         apiConfig = config['api-configuration'];
         SECRET_KEY = apiConfig['private-key'];
-		Collection.prototype.collection = userConfig.collection;
+        collection = db.collection(userConfig.collection);
     }
 
     /**
@@ -33,9 +32,8 @@ class UserResource {
             if(!body.hasOwnProperty('email') || !body.hasOwnProperty('password')) throw new Error('You must inform the user email and password');
             body.password = Security.md5(body.password).toString();
             if(!body.hasOwnProperty('roles')) body.roles = [userConfig['default-role']];
-			let obj = new Collection(body);
-			yield obj.save();
-            obj.unset('password');
+            let obj = yield collection.insert(body);
+			delete obj.password;
 			response.status(200).jsonp(obj);
 		} catch (e) {
 			response.status(500).jsonp(e.toString());
@@ -62,10 +60,10 @@ class UserResource {
             return;
         }
 		try {
-            let obj = yield Collection.findOne({ username: body.username, password: Security.md5(body.password).toString() });
-            obj.unset('password');
-            obj.unset('created_at');
-            obj.unset('updated_at');
+            let obj = yield collection.findOne({ username: body.username, password: Security.md5(body.password).toString() });
+            delete obj.password;
+            delete obj.created_at;
+            delete obj.updated_at;
             const token = Security.generateAccessToken(obj, SECRET_KEY);
             response.status(200).jsonp(token);
 		} catch (e) {
