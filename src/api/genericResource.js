@@ -108,7 +108,7 @@ class GenericResource {
 		try {
             let query = { _id: body._id };
             delete body._id;
-            yield collection.update(query, body);
+            yield collection.update(query, { $set: body });
 			response.status(200).send('success');
 		} catch (e) {
             logger.error(e.stack);
