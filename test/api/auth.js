@@ -113,5 +113,8 @@ describe('Authentication API', () => {
 		}
     });
 	
-	after(() => { server.close(); });
+	after(function*() {
+		yield global.db.collection('users').remove({});
+		server.close();
+	});
 });
