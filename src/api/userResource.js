@@ -30,6 +30,8 @@ class UserResource {
 		try {
             let body = JSON.parse(JSON.stringify(request.body));
             if(!body.hasOwnProperty('email') || !body.hasOwnProperty('password')) throw new Error('You must inform the user email and password');
+            let hasUsers = yield collection.find({ email: body.email });
+            if(hasUsers.length>0) throw new Error('This e-mail is already registered.');
             body.password = Security.md5(body.password).toString();
             if(!body.hasOwnProperty('roles')) body.roles = [userConfig['default-role']];
             let obj = yield collection.insert(body);

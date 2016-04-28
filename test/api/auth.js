@@ -45,6 +45,19 @@ describe('Authentication API', () => {
 		}
 	});
 	
+	it('should fail to create a new user with an existing email', function*() {
+		let user = { email: email, password: '654321' };
+		let data;
+		try {
+			var output = yield Http.post(`${host}/signup`, user);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 500);
+		}
+	});
+	
 	it('should create another user', function*() {
 		let user = { email: email+'222', password: '123456' };
 		let data;
