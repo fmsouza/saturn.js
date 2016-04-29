@@ -89,10 +89,11 @@ class UserResource {
     }
     
     *updatePassword(request, response) {
-        let token = request.headers['authorization'];
-        let body = request.body;
-        let data = Security.decryptAccessToken(token, SECRET_KEY);
         try {
+            let token = request.headers['authorization'];
+            if(!token) throw new Error('You must be authenticated to do this operation.');
+            let body = request.body;
+            let data = Security.decryptAccessToken(token, SECRET_KEY);
             let user = yield collection.findOne({ _id: data._id});
             if(!user)
                 throw new Error('User not found');

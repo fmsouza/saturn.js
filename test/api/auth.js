@@ -101,6 +101,19 @@ describe('Authentication API', () => {
 		}
 	});
 	
+	it('should fail to update user password without authorization', function*() {
+		let pass = { currentPassword: '123456', newPassword: '1234567' };
+		let data;
+		try {
+			var output = yield Http.put(`${host}/update-password`, pass);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 500, JSON.stringify(data.error));
+		}
+	});
+	
 	it('should send an e-mail with instructions to recover user password', function*() {
 		let mail = { email: email };
 		let data;
