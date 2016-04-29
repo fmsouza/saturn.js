@@ -99,6 +99,14 @@ function *forwardRoute(request, response, resource, config) {
             if(method==='POST') yield tmp.signoff(request, response);
             else response.status(400).send(`Method ${request.method} is not allowed for '/signoff'.`);
             break;
+        case '/update-password':
+            if(method==='PUT') yield tmp.updatePassword(request, response);
+            else response.status(400).send(`Method ${request.method} is not allowed for '/update-password'.`);
+            break;
+        case '/recover-password':
+            if(method==='POST') yield tmp.recoverPassword(request, response);
+            else response.status(400).send(`Method ${request.method} is not allowed for '/recover-password'.`);
+            break;
         default:
             yield readFromConfig(route, request, response, resource, config);
             break;

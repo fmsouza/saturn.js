@@ -4,8 +4,11 @@ const Core = require('../core');
 const Database = Core.Database;
 const Common = require('../common');
 const Security = Common.Security;
+const LoggerFactory = require('../core/log/loggerFactory');
 
 let SECRET_KEY, apiConfig, userConfig, collection;
+
+const logger = LoggerFactory.getRuntimeLogger();
 
 /**
  * UserResource class is responsible for handling the user access control management.
@@ -83,6 +86,30 @@ class UserResource {
      */
 	*signoff(request, response) {
         response.status(500).send('');
+    }
+    
+    *updatePassword(request, response) {
+        let token = request.headers['authorization'];
+        let body = request.body;
+        let data = Security.decryptAccessToken(token, SECRET_KEY);
+        try {
+            let user = yield collection.findOne({ _id: data._id});
+            if(!user)
+                throw new Error('User not found');
+            if(Security.md5(body.currentPassword).toString()!==user.password)
+                throw new Error('Current password mismatch.');
+                
+            let newPass = Security.md5(body.newPassword).toString();
+            yield collection.update({ _id: body._id }, { $set: { password: newPass } });
+			response.status(200).send('success');
+        } catch (e) {
+            logger.error(e.stack);
+			response.status(500).jsonp(e.toString());
+        }
+    }
+    
+    *recoverPassword(request, response) {
+        response.status(500).send(JSON.stringify(request.body));
     }
 }
 module.exports = UserResource;

@@ -87,6 +87,32 @@ describe('Authentication API', () => {
             token = data.body;
 		}
 	});
+	
+	it('should update user password', function*() {
+		let pass = { currentPassword: '123456', newPassword: '1234567' };
+		let data;
+		try {
+			var output = yield Http.put(`${host}/update-password`, pass, { 'Authorization': token });
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200, JSON.stringify(data.error));
+		}
+	});
+	
+	it('should send an e-mail with instructions to recover user password', function*() {
+		let mail = { email: email };
+		let data;
+		try {
+			var output = yield Http.post(`${host}/recover-password`, mail);
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200, JSON.stringify(data.error));
+		}
+	});
     
     it('should allow the user to access the private API using the authorization key', function*() {
         let data;

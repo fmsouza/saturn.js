@@ -78,6 +78,8 @@
         },
         "/signin": { "POST": { "public": true } },
         "/signup": { "POST": { "public": true } },
-        "/signoff": { "POST": { "public": false } }
+        "/signoff": { "POST": { "public": false } },
+        "/recover-password": { "POST": { "public": true } },
+        "/update-password": { "PUT": { "public": false } }
     }
 }
