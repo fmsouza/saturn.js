@@ -5,5 +5,6 @@ module.exports = {
 	Http: 			require(`${root}/http`),
 	Logger: 		require(`${root}/log/logger`),
 	LoggerFactory: 	require(`${root}/log/loggerFactory`),
-	Router: 		require(`${root}/router`)
+	Router: 		require(`${root}/router`),
+	MailServer:		require(`${root}/mail/server`),
 }

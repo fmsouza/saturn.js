@@ -1,12 +1,11 @@
 'use strict';
 /* global Buffer, db; */
-const Core = require('../core');
-const Database = Core.Database;
 const Common = require('../common');
+const MailServer = require('../core/mail/server');
 const Security = Common.Security;
 const LoggerFactory = require('../core/log/loggerFactory');
 
-let SECRET_KEY, apiConfig, userConfig, collection;
+let SECRET_KEY, apiConfig, userConfig, mailConfig, collection;
 
 const logger = LoggerFactory.getRuntimeLogger();
 
@@ -20,6 +19,7 @@ class UserResource {
         userConfig = config['users'];
         apiConfig = config['api-configuration'];
         SECRET_KEY = apiConfig['private-key'];
+        mailConfig = config['mail-config'];
         collection = db.collection(userConfig.collection);
     }
 
@@ -97,7 +97,7 @@ class UserResource {
             let user = yield collection.findOne({ _id: data._id});
             if(!user)
                 throw new Error('User not found');
-            if(Security.md5(body.currentPassword).toString()!==user.password)
+            if(!data.recovery && Security.md5(body.currentPassword).toString()!==user.password)
                 throw new Error('Current password mismatch.');
                 
             let newPass = Security.md5(body.newPassword).toString();
@@ -110,7 +110,36 @@ class UserResource {
     }
     
     *recoverPassword(request, response) {
-        response.status(500).send(JSON.stringify(request.body));
+        try {
+            let email = request.body.email;
+            if(!email) throw new Error('The user e-mail must be provided.');
+            let user = yield collection.findOne({ email: email });
+            if(!user) throw new Error('This user does not exist.');
+            user.recovery = true;
+            delete user.password;
+            delete user.created_at;
+            delete user.updated_at;
+            const token = Security.generateAccessToken(user, SECRET_KEY);
+            
+            let msgConfig = mailConfig.message;
+            let serverConfig = mailConfig.server;
+            let address = `${apiConfig['base-url']}/${token}`;
+            
+            let mail = {};
+            mail.from = msgConfig.from;
+            mail.to = email;
+            mail.subject = msgConfig.subject;
+            mail.text = msgConfig.text.replace(/\$\$/, address);
+            
+            let server = new MailServer(serverConfig);
+            server.sendMail(mail, (error, message) => {
+                if(error) console.log(error.toString());
+                response.status(200).send('success');
+            });
+        } catch (e) {
+            logger.error(e.stack);
+			response.status(500).jsonp(e.toString());
+        }
     }
 }
 module.exports = UserResource;

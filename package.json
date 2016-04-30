@@ -4,7 +4,7 @@
   "description": "HTTP/PubSub dynamic Web Server",
   "main": "src/app.js",
   "scripts": {
-    "test": "mocha test/ test/**/*",
+    "test": "mocha test/ test/**/* --timeout 10000",
     "start": "node src/app.js",
     "install": "npm install -g mocha-co"
   },
@@ -37,6 +37,7 @@
     "co-express": "^1.2.1",
     "compression": "^1.5.2",
     "crypto-js": "^3.1.6",
+    "emailjs": "^1.0.4",
     "express": "^4.13.3",
     "fs-extra": "^0.26.4",
     "helmet": "^0.14.0",
