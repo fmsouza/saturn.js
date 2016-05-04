@@ -100,8 +100,8 @@ class UserResource {
             if(!data.recovery && Security.md5(body.currentPassword).toString()!==user.password)
                 throw new Error('Current password mismatch.');
                 
-            let newPass = Security.md5(body.newPassword).toString();
-            yield collection.update({ _id: body._id }, { $set: { password: newPass } });
+            user.password = Security.md5(body.newPassword).toString();
+            yield user.save();
 			response.status(200).send('success');
         } catch (e) {
             logger.error(e.stack);
