@@ -41,7 +41,8 @@ describe('Authentication API', () => {
 		} finally {
 			Assert.equal(data.statusCode, 200);
             Assert.equal(data.body.email, email);
-            Assert.equal(data.body.roles[0], 'user');
+            Assert.equal(data.body.roles.indexOf('user')>-1, true, 'New user must have \'user\' role.');
+            Assert.notEqual(data.body.roles.indexOf('admin')>-1, true, 'New user must not be admin.');
 		}
 	});
 	
@@ -69,7 +70,8 @@ describe('Authentication API', () => {
 		} finally {
             Assert.equal(data instanceof Error, false);
             Assert.equal(data.email, email+'222');
-            Assert.equal(data.roles[0], 'user');
+            Assert.equal(data.roles.indexOf('user')>-1, true, 'New user must have \'user\' role.');
+            Assert.notEqual(data.roles.indexOf('admin')>-1, true, 'New user must not be admin.');
 		}
 	});
 	
@@ -144,6 +146,18 @@ describe('Authentication API', () => {
         let data;
 		try {
 			var output = yield Http.get(`${host}/users`, { 'Authorization': token });
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 400, 'User should not be allowed here.');
+		}
+    });
+    
+    it('should not allow the user to access role update API using the authorization key when not an admin', function*() {
+        let data, config = { email: email, roles: ['user', 'admin', 'role3'] };
+		try {
+			var output = yield Http.put(`${host}/update-roles`, { 'Authorization': token });
 			data = output;
 		} catch(e) {
 			data = e;

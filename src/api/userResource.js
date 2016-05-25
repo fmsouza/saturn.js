@@ -88,6 +88,21 @@ class UserResource {
         response.status(500).send('');
     }
     
+    *updateRoles(request, response) {
+        try {
+            let token = request.headers['authorization'];
+            if(!token) throw new Error('You must be authenticated to do this operation.');
+            let data = Security.decryptAccessToken(token, SECRET_KEY);
+            let user = yield collection.findOne({ _id: data._id});
+            if(!user) throw new Error('User not found.');
+            if(user.roles.indexOf('admin')===-1) throw new Error('You do not have privileges do this operation.');
+            response.status(200).send('success');
+        } catch (e) {
+            logger.error(e.stack);
+            response.status(400).jsonp(e.toString());
+        }
+    }
+    
     *updatePassword(request, response) {
         try {
             let token = request.headers['authorization'];
@@ -96,7 +111,7 @@ class UserResource {
             let data = Security.decryptAccessToken(token, SECRET_KEY);
             let user = yield collection.findOne({ _id: data._id});
             if(!user)
-                throw new Error('User not found');
+                throw new Error('User not found.');
             if(!data.recovery && Security.md5(body.currentPassword).toString()!==user.password)
                 throw new Error('Current password mismatch.');
                 

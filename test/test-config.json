@@ -94,6 +94,7 @@
         "/signup": { "POST": { "public": true } },
         "/signoff": { "POST": { "public": false } },
         "/recover-password": { "POST": { "public": true } },
-        "/update-password": { "PUT": { "public": false } }
+        "/update-password": { "PUT": { "public": false } },
+        "/update-roles": { "PUT": { "public": false, "roles": ["admin"] } }
     }
 }
