@@ -87,22 +87,43 @@ class UserResource {
 	*signoff(request, response) {
         response.status(500).send('');
     }
-    
+
+    /**
+     * Updates an existing user's roles
+     * @param {Object} request - HTTP request object data
+     * @param {Object} response - HTTP response object data
+     * @return {void}
+     */
     *updateRoles(request, response) {
         try {
             let token = request.headers['authorization'];
             if(!token) throw new Error('You must be authenticated to do this operation.');
             let data = Security.decryptAccessToken(token, SECRET_KEY);
-            let user = yield collection.findOne({ _id: data._id});
-            if(!user) throw new Error('User not found.');
-            if(user.roles.indexOf('admin')===-1) throw new Error('You do not have privileges do this operation.');
-            response.status(200).send('success');
+            let adm = yield collection.findOne({ _id: data._id});
+            if(!adm) throw new Error('User not found.');
+            if(adm.roles.indexOf('admin')===-1) throw new Error('You do not have privileges do this operation.');
+            
+            let body = request.body;
+            let user = yield collection.findOne({ email: body.email });
+            if(!user) throw new Error('The user you want to update does not exist.');
+            user.roles = body.roles;
+            yield user.save();
+            delete user.password;
+            delete user.created_at;
+            delete user.updated_at;
+            response.status(200).jsonp(user);
         } catch (e) {
             logger.error(e.stack);
             response.status(400).jsonp(e.toString());
         }
     }
-    
+
+    /**
+     * Updates an existing user's password
+     * @param {Object} request - HTTP request object data
+     * @param {Object} response - HTTP response object data
+     * @return {void}
+     */
     *updatePassword(request, response) {
         try {
             let token = request.headers['authorization'];
@@ -123,7 +144,13 @@ class UserResource {
 			response.status(500).jsonp(e.toString());
         }
     }
-    
+
+    /**
+     * Recovers an existing user's password
+     * @param {Object} request - HTTP request object data
+     * @param {Object} response - HTTP response object data
+     * @return {void}
+     */
     *recoverPassword(request, response) {
         try {
             let email = request.body.email;

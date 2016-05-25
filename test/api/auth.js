@@ -7,13 +7,15 @@ const base = `${__dirname}/../../src`;
 const Assert    = require('assert');
 const Core      = require(`${base}/core`);
 const Config	= require(`${base}/config`);
+const Common	= require(`${base}/common`);
+const Security	= Common.Security;
 const Database  = Core.Database;
 const Model		= Database.Model;
 const Http	    = Core.Http;
 const Router    = Core.Router;
 const File      = Core.File;
 
-var router, token;
+var router, token, admToken;
 
 describe('Authentication API', () => {
 	
@@ -26,8 +28,13 @@ describe('Authentication API', () => {
 		host = `http://${serverConfig.host}:${serverConfig.port}`;
 		
 		global.db = yield Database.connect(dbConfig);
+		let adm = yield global.db.collection('users').insert({email:'admin@email.com',password:'fcea920f7412b5da7be0cf42b8c93759',roles:['user','admin']});
+		delete adm.password;
+		admToken = Security.generateAccessToken(adm, 'secret_key');
+		
 		let router = new Router(config);
 		server = router.start(serverConfig.host, serverConfig.port);
+		
 	});
 	
 	it('should create a new user', function*() {
@@ -150,19 +157,35 @@ describe('Authentication API', () => {
 		} catch(e) {
 			data = e;
 		} finally {
-			Assert.equal(data.statusCode, 400, 'User should not be allowed here.');
+			Assert.equal(data.statusCode, 400);
 		}
     });
     
     it('should not allow the user to access role update API using the authorization key when not an admin', function*() {
-        let data, config = { email: email, roles: ['user', 'admin', 'role3'] };
+        let data, config = { email: email, roles: ['user', 'role3'] };
 		try {
-			var output = yield Http.put(`${host}/update-roles`, { 'Authorization': token });
+			var output = yield Http.put(`${host}/update-roles`, config, { 'Authorization': token });
 			data = output;
 		} catch(e) {
 			data = e;
 		} finally {
 			Assert.equal(data.statusCode, 400);
+		}
+    });
+    
+    it('should update an user roles using the authorization token from an admin user', function*() {
+        let data, config = { email: email, roles: ['user', 'role3'] };
+		try {
+			var output = yield Http.put(`${host}/update-roles`, config, { 'Authorization': admToken });
+			data = output;
+		} catch(e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 200);
+			const tmp = data.body;
+			Assert.equal(tmp.email, config.email, 'Result e-mail is different.');
+			Assert(tmp.roles.indexOf('user')>-1, `No role 'user'.`);
+			Assert(tmp.roles.indexOf('role3')>-1, `No role 'role3'.`);
 		}
     });
 	
