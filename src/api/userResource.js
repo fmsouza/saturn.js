@@ -64,12 +64,8 @@ class UserResource {
             response.end('Authorization required');
             return;
         }
-        console.log(`Body: ${JSON.stringify(body)}`);
-        console.log(`E-mail: ${body.email}`);
-        console.log(`Password: ${body.password}`);
 		try {
             let obj = yield collection.findOne({ email: body.email, password: Security.md5(body.password).toString() });
-            console.log(`Obj: ${JSON.stringify(obj)}`);
             delete obj.password;
             delete obj.created_at;
             delete obj.updated_at;
