@@ -58,14 +58,18 @@ class UserResource {
             let auth = request.headers.authorization.replace(/^Basic /, '');
             auth = (new Buffer(auth, 'base64').toString('utf8'));
             auth = auth.split(':');
-            body = { username: auth[0], password: auth[1] };
+            body = { email: auth[0], password: auth[1] };
         } else {
             response.writeHead(401, {'WWW-Authenticate': `Basic realm="Provide the email and password"`});
             response.end('Authorization required');
             return;
         }
+        console.log(`Body: ${JSON.stringify(body)}`);
+        console.log(`E-mail: ${body.email}`);
+        console.log(`Password: ${body.password}`);
 		try {
-            let obj = yield collection.findOne({ username: body.username, password: Security.md5(body.password).toString() });
+            let obj = yield collection.findOne({ email: body.email, password: Security.md5(body.password).toString() });
+            console.log(`Obj: ${JSON.stringify(obj)}`);
             delete obj.password;
             delete obj.created_at;
             delete obj.updated_at;

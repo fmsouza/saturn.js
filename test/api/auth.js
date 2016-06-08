@@ -96,6 +96,19 @@ describe('Authentication API', () => {
             token = data.body;
 		}
 	});
+
+	it('should fail to login with the wrong email', function* () {
+		let user = { email: email + 'wrong', password: '123456' };
+		let data;
+		try {
+			var output = yield Http.post(`${host}/signin`, user);
+			data = output;
+		} catch (e) {
+			data = e;
+		} finally {
+			Assert.equal(data.statusCode, 401);
+		}
+	});
 	
 	it('should update user password', function*() {
 		let pass = { currentPassword: '123456', newPassword: '1234567' };
