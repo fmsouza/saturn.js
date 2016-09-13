@@ -66,10 +66,8 @@ class UserResource {
         }
 		try {
             let obj = yield collection.findOne({ email: body.email, password: Security.md5(body.password).toString() });
-            delete obj.password;
-            delete obj.created_at;
-            delete obj.updated_at;
-            const token = Security.generateAccessToken(obj, SECRET_KEY);
+            let tmp = { email: obj.email, _id: obj._id, roles: obj.roles };
+            const token = Security.generateAccessToken(tmp, SECRET_KEY);
             response.status(200).jsonp(token);
 		} catch (e) {
             response.writeHead(401, {'WWW-Authenticate': `Basic realm="Provide the email and password"`});
